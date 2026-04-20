@@ -2,15 +2,23 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePractitionerDto } from './create-practitioner.dto';
 import { UpdatePractitionerDto } from './update-practitioner.dto';
+import { FhirService } from '../fhir/fhir.service';
 
 @Injectable()
 export class PractitionerService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private fhirService: FhirService,
+  ) {}
 
   async create(data: CreatePractitionerDto) {
-    return this.prisma.practitioner.create({
+    const newPractitioner = await this.prisma.practitioner.create({
       data,
     });
+
+    this.fhirService.syncPractitioner(newPractitioner).catch(() => {});
+
+    return newPractitioner;
   }
 
   async findAll() {

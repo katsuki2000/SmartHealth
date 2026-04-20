@@ -1,5 +1,6 @@
-import { Controller, Post, Body, Get, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Put, Delete, Logger } from '@nestjs/common';
 import { ApiOperation, ApiTags, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { EventPattern, Payload } from '@nestjs/microservices';
 import { PrescriptionService } from './prescription.service';
 import { CreatePrescriptionDto } from './create-prescription.dto';
 import { UpdatePrescriptionDto } from './update-prescription.dto';
@@ -7,7 +8,15 @@ import { UpdatePrescriptionDto } from './update-prescription.dto';
 @ApiTags('prescriptions')
 @Controller('prescriptions')
 export class PrescriptionController {
+  private readonly logger = new Logger(PrescriptionController.name);
+
   constructor(private readonly prescriptionService: PrescriptionService) {}
+
+  @EventPattern('appointment_created')
+  async handleAppointmentCreated(@Payload() message: any) {
+    this.logger.log(`📥 KAFKA EVENT RECEIVED in Prescription Module! Appointment ID: ${message.id}`);
+    // Future expansion: Automatically draft a Blank Prescription here!
+  }
 
   @ApiOperation({ summary: 'Créer une ordonnance/prescription' })
   @ApiCreatedResponse({ description: 'La prescription a été créée avec succès.' })

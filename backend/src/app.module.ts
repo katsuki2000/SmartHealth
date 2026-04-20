@@ -7,9 +7,10 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AppointmentModule } from './appointment/appointment.module';
 import { PrescriptionModule } from './prescription/prescription.module';
 import { FhirModule } from './fhir/fhir.module';
+import { KafkaModule } from './kafka/kafka.module';
 
 @Module({
-  imports: [PatientModule, PractitionerModule, PrismaModule, AppointmentModule, PrescriptionModule, FhirModule],
+  imports: [PatientModule, PractitionerModule, PrismaModule, AppointmentModule, PrescriptionModule, FhirModule, KafkaModule],
   controllers: [AppController],
   providers: [AppService],
 })

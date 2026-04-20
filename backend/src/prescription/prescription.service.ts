@@ -2,15 +2,23 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePrescriptionDto } from './create-prescription.dto';
 import { UpdatePrescriptionDto } from './update-prescription.dto';
+import { FhirService } from '../fhir/fhir.service';
 
 @Injectable()
 export class PrescriptionService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private fhirService: FhirService,
+  ) {}
 
   async create(data: CreatePrescriptionDto) {
-    return this.prisma.prescription.create({
+    const newPrescription = await this.prisma.prescription.create({
       data,
     });
+
+    this.fhirService.syncPrescription(newPrescription).catch(() => {});
+
+    return newPrescription;
   }
 
   async findAll() {
