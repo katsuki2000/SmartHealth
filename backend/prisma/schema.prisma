@@ -9,10 +9,54 @@ datasource db {
 }
 
 model Patient {
-  id        String   @id @default(uuid())
-  firstName String
-  lastName  String
-  birthDate DateTime
-  gender    String
-  createdAt DateTime @default(now())
+  id            String         @id @default(uuid())
+  firstName     String
+  lastName      String
+  birthDate     DateTime
+  gender        String
+  appointments  Appointment[]
+  prescriptions Prescription[]
+  createdAt     DateTime       @default(now())
+}
+
+model Practitioner {
+  id            String         @id @default(uuid())
+  firstName     String
+  lastName      String
+  specialty     String
+  email         String?        @unique
+  phone         String?
+  appointments  Appointment[]
+  prescriptions Prescription[]
+  createdAt     DateTime       @default(now())
+}
+
+model Appointment {
+  id             String         @id @default(uuid())
+  dateTime       DateTime
+  status         String         @default("SCHEDULED")
+  reason         String?
+  patientId      String
+  practitionerId String
+  patient        Patient        @relation(fields: [patientId], references: [id])
+  practitioner   Practitioner   @relation(fields: [practitionerId], references: [id])
+  prescriptions  Prescription[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model Prescription {
+  id             String       @id @default(uuid())
+  medications    String       
+  instructions   String?
+  issuedAt       DateTime     @default(now())
+  
+  appointmentId  String?      
+  appointment    Appointment? @relation(fields: [appointmentId], references: [id])
+  
+  patientId      String
+  patient        Patient      @relation(fields: [patientId], references: [id])
+  
+  practitionerId String
+  practitioner   Practitioner @relation(fields: [practitionerId], references: [id])
 }
