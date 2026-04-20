@@ -1,18 +1,27 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePatientDto } from './create-patient.dto';
+import { FhirService } from '../fhir/fhir.service';
 
 @Injectable()
 export class PatientService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private fhirService: FhirService,
+  ) {}
 
   async create(data: CreatePatientDto) {
-    return this.prisma.patient.create({
+    const newPatient = await this.prisma.patient.create({
       data: {
         ...data,
         birthDate: new Date(data.birthDate),
       },
     });
+    
+    // Asynchronously sync the new patient to the HAPI FHIR server
+    this.fhirService.syncPatient(newPatient).catch(() => {});
+
+    return newPatient;
   }
 
   async findAll() {

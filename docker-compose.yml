@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  hapi-fhir:
+    image: hapiproject/hapi:latest
+    container_name: smarthealth-fhir
+    ports:
+      - "8081:8080" # Exposed on port 8081 to avoid Keycloak conflicts
+    environment:
+      - spring.datasource.url=jdbc:h2:mem:hapi
+      - hapi.fhir.fhir_version=R4
+    restart: unless-stopped

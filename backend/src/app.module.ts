@@ -6,9 +6,10 @@ import { PractitionerModule } from './practitioner/practitioner.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AppointmentModule } from './appointment/appointment.module';
 import { PrescriptionModule } from './prescription/prescription.module';
+import { FhirModule } from './fhir/fhir.module';
 
 @Module({
-  imports: [PatientModule, PractitionerModule, PrismaModule, AppointmentModule, PrescriptionModule],
+  imports: [PatientModule, PractitionerModule, PrismaModule, AppointmentModule, PrescriptionModule, FhirModule],
   controllers: [AppController],
   providers: [AppService],
 })
