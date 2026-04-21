@@ -13,6 +13,15 @@ const logger = new Logger('Bootstrap');
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
+  // Enable CORS for frontend development
+  const corsOrigin = (process.env.CORS_ORIGIN || 'http://localhost:3000,http://localhost:4200,http://localhost:5173').split(',');
+  app.enableCors({
+    origin: corsOrigin.map(o => o.trim()),
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  });
+  
   // Apply global validation pipe
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,

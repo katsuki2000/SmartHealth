@@ -241,6 +241,256 @@ pnpm run build
 # Output directory: dist/
 ```
 
+## 🎨 Pour les Développeurs Frontend
+
+### Guide d'Intégration
+
+#### 1. **Setup du Backend**
+
+Si vous êtes un développeur frontend, vous devez d'abord setup le backend localement :
+
+```bash
+# Cloner le repository
+git clone <repo-url>
+cd SmartHealth/backend
+
+# Installer les dépendances
+pnpm install
+
+# Configurer l'environnement
+cp .env.example .env
+
+# Éditer .env avec vos credentials PostgreSQL
+# DATABASE_URL=postgresql://user:password@localhost:5432/smarthealth
+
+# Exécuter les migrations
+pnpm run prisma:migrate
+
+# Lancer le backend en mode développement
+pnpm run start:dev
+
+# Le backend sera disponible à http://localhost:3000
+```
+
+#### 2. **Vérifier la Connexion**
+
+```bash
+# Tester l'endpoint de santé (pas d'authentification requise)
+curl http://localhost:3000/health
+
+# Réponse attendue:
+# {
+#   "status": "ok",
+#   "timestamp": "2026-04-21T10:30:00.000Z",
+#   "message": "SmartHealth API is running"
+# }
+```
+
+#### 3. **Créer votre Projet Frontend**
+
+```bash
+# React
+npx create-react-app ../frontend
+cd ../frontend
+
+# OR Vue
+npm create vue@latest ../frontend
+
+# OR Angular
+ng new ../frontend
+
+# OR Vite
+npm create vite@latest ../frontend
+```
+
+#### 4. **Configurer la Connexion à l'API**
+
+Créez un fichier `src/services/api.ts` :
+
+```typescript
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
+
+export const apiClient = {
+  async request(endpoint: string, options: RequestInit = {}) {
+    const token = localStorage.getItem('token');
+    const headers: any = {
+      'Content-Type': 'application/json',
+      ...options.headers
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...options,
+      headers
+    });
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.statusText}`);
+    }
+
+    return response.json();
+  },
+
+  get: (endpoint: string) => apiClient.request(endpoint),
+  post: (endpoint: string, body: any) => 
+    apiClient.request(endpoint, { method: 'POST', body: JSON.stringify(body) }),
+  put: (endpoint: string, body: any) =>
+    apiClient.request(endpoint, { method: 'PUT', body: JSON.stringify(body) }),
+  delete: (endpoint: string) =>
+    apiClient.request(endpoint, { method: 'DELETE' })
+};
+```
+
+#### 5. **Configuration Frontend (.env)**
+
+```env
+# .env (frontend)
+REACT_APP_API_URL=http://localhost:3000
+```
+
+#### 6. **Exemple d'Utilisation**
+
+```typescript
+// src/pages/Patients.tsx (React)
+import { useState, useEffect } from 'react';
+import { apiClient } from '../services/api';
+
+export function Patients() {
+  const [patients, setPatients] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchPatients();
+  }, []);
+
+  const fetchPatients = async () => {
+    try {
+      const data = await apiClient.get('/patients');
+      setPatients(data);
+    } catch (error) {
+      console.error('Failed to fetch patients:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createPatient = async (patientData: any) => {
+    try {
+      const newPatient = await apiClient.post('/patients', patientData);
+      setPatients([...patients, newPatient]);
+    } catch (error) {
+      console.error('Failed to create patient:', error);
+    }
+  };
+
+  if (loading) return <div>Chargement...</div>;
+
+  return (
+    <div>
+      <h1>Patients</h1>
+      {patients.map(patient => (
+        <div key={patient.id}>
+          <h3>{patient.firstName} {patient.lastName}</h3>
+          <p>Email: {patient.email}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+#### 7. **Authentification (JWT)**
+
+```typescript
+// src/services/auth.ts
+export const authService = {
+  async login(email: string, password: string) {
+    const response = await apiClient.post('/auth/login', { email, password });
+    localStorage.setItem('token', response.access_token);
+    return response;
+  },
+
+  async register(userData: any) {
+    return await apiClient.post('/auth/register', userData);
+  },
+
+  logout() {
+    localStorage.removeItem('token');
+  },
+
+  isAuthenticated() {
+    return !!localStorage.getItem('token');
+  }
+};
+```
+
+#### 8. **Structure Recommandée du Frontend**
+
+```
+frontend/
+├── src/
+│   ├── components/
+│   │   ├── PatientForm.tsx
+│   │   ├── AppointmentCard.tsx
+│   │   └── PrescriptionList.tsx
+│   ├── pages/
+│   │   ├── Login.tsx
+│   │   ├── Patients.tsx
+│   │   ├── Appointments.tsx
+│   │   └── Prescriptions.tsx
+│   ├── services/
+│   │   ├── api.ts
+│   │   ├── auth.ts
+│   │   └── patient.ts
+│   ├── hooks/
+│   │   ├── useAuth.ts
+│   │   └── useApi.ts
+│   ├── App.tsx
+│   └── main.tsx
+├── .env
+└── package.json
+```
+
+#### 9. **Variables d'Environnement (Backend)**
+
+Assurez-vous que `.env.example` est bien configuré (déjà fait) :
+
+- `CORS_ORIGIN` inclut votre port frontend (3000, 4200, 5173, etc.)
+- `JWT_SECRET` est défini
+- `DATABASE_URL` pointe vers PostgreSQL
+
+#### 10. **Dépannage**
+
+**CORS Error ?**
+```
+- Vérifiez que CORS_ORIGIN dans .env inclut votre frontend URL
+- Assurez-vous que main.ts a enableCors()
+```
+
+**Token invalide ?**
+```
+- Vérifiez que le JWT_SECRET est identique au backend
+- Vérifie que le token est bien stocké dans localStorage
+```
+
+**API introuvable ?**
+```
+- Vérifiez que le backend écoute sur http://localhost:3000
+- Testez avec curl http://localhost:3000/health
+```
+
+### Ressources Utiles
+
+- 📖 [Swagger/OpenAPI](http://localhost:3000/api/docs) - Documentation interactive de l'API
+- 🏗️ [Architecture Document](../ARCHITECTURE.md) - Vue d'ensemble du système
+- 🔐 [JWT Best Practices](https://tools.ietf.org/html/rfc7519)
+- 📝 [FHIR Standard](https://www.hl7.org/fhir/)
+
+---
+
 ## Contributing
 
 1. Create a feature branch (`git checkout -b feature/amazing-feature`)
