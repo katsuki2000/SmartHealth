@@ -1,11 +1,12 @@
 import { Controller, Post, Body, Get, Param, Put, Delete, Logger } from '@nestjs/common';
-import { ApiOperation, ApiTags, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiTags, ApiCreatedResponse, ApiOkResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { EventPattern, Payload } from '@nestjs/microservices';
 import { PrescriptionService } from './prescription.service';
 import { CreatePrescriptionDto } from './create-prescription.dto';
 import { UpdatePrescriptionDto } from './update-prescription.dto';
 
 @ApiTags('prescriptions')
+@ApiBearerAuth()
 @Controller('prescriptions')
 export class PrescriptionController {
   private readonly logger = new Logger(PrescriptionController.name);

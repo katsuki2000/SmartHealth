@@ -1,10 +1,11 @@
 import { Controller, Post, Body, Get, Param, Put, Delete } from '@nestjs/common';
-import { ApiOperation, ApiTags, ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiTags, ApiCreatedResponse, ApiOkResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { PractitionerService } from './practitioner.service';
 import { CreatePractitionerDto } from './create-practitioner.dto';
 import { UpdatePractitionerDto } from './update-practitioner.dto';
 
 @ApiTags('practitioners')
+@ApiBearerAuth()
 @Controller('practitioners')
 export class PractitionerController {
   constructor(private readonly practitionerService: PractitionerService) {}
