@@ -1,124 +1,62 @@
-# Document d’Architecture - Plateforme de Santé Interopérable (FHIR + APIs)
+# SmartHealth Architecture
 
-## 1. Introduction
-### 1.1 Contexte
-Les systèmes de santé sont souvent fragmentés, avec des données dispersées entre hôpitaux, laboratoires et pharmacies. Cette situation limite la continuité des soins et complique la prise de décision médicale.
+This repository holds the entire SmartHealth interoperability platform, organized as a PNPM Monorepo. 
+We favor local development without Docker to reduce resource overhead on developer machines.
 
-### 1.2 Problématique
-Comment assurer une interopérabilité efficace, sécurisée et standardisée entre différents systèmes de santé hétérogènes ?
+## 🏗️ Monorepo Structure
 
-### 1.3 Objectifs
-- Centraliser et exposer les données de santé via des standards ouverts
-- Assurer l’interopérabilité grâce à FHIR (Fast Healthcare Interoperability Resources)
-- Fournir des APIs sécurisées pour l’accès aux données
-- Garantir la confidentialité et la conformité réglementaire
-
-## 2. Vue d’ensemble de l’architecture
-### 2.1 Type d’architecture
-- Architecture microservices
-- Architecture API-first
-- Approche event-driven
-
-### 2.2 Principes clés
-- Interopérabilité (FHIR, HL7)
-- Scalabilité
-- Sécurité (Zero Trust)
-- Modularité
-- Haute disponibilité
-
-## 3. Architecture logique
-### 3.1 Composants principaux
-1. **API Gateway**
-   - Point d’entrée unique
-   - Gestion des requêtes (routing, throttling, logging)
-   - Authentification (OAuth2, OpenID Connect)
-2. **Serveur FHIR**
-   - Stockage et gestion des ressources FHIR
-   - Exposition via API RESTful
-   - Exemple : HAPI FHIR
-3. **Services métiers (microservices)**
-   - Gestion des patients
-   - Gestion des rendez-vous
-   - Gestion des prescriptions
-   - Gestion des dossiers médicaux
-4. **Bus d’intégration (ESB / Event Bus)**
-   - Communication entre services
-   - Kafka / RabbitMQ
-5. **Base de données**
-   - Base relationnelle (PostgreSQL)
-6. **Système d’identité (IAM)**
-   - Gestion des utilisateurs
-   - Rôles (médecin, patient, admin)
-   - Authentification forte
-7. **Connecteurs externes**
-   - Hôpitaux
-   - Laboratoires
-   - Assurances
-   - Applications mobiles
-
-## 4. Architecture technique
-### 4.1 Stack technologique (exemple)
-- **Backend** : Node.js
-- **FHIR Server** : HAPI FHIR
-- **API Gateway** : Kong / NGINX / AWS API Gateway
-- **Messaging** : Apache Kafka
-- **Base de données** : PostgreSQL
-- **Auth** : Keycloak
-
-## 5. Modèle de données (FHIR)
-### 5.1 Ressources principales
-- Patient
-- Practitioner
-- Encounter
-- Observation
-- Medication
-- Appointment
-
-### 5.2 Format
-- JSON (principal)
-
-### 5.3 Exemple (simplifié)
-```json
-{
-  "resourceType": "Patient",
-  "id": "123",
-  "name": [{
-    "family": "Rakoto",
-    "given": ["Jean"]
-  }],
-  "gender": "male",
-  "birthDate": "1990-01-01"
-}
+```text
+SmartHealth/
+├── apps/
+│   ├── ingestion-service/     # NestJS - Point d'entrée FHIR & Backend Core
+│   ├── orchestrator-worker/   # Temporal Worker (Workflows & Activities)
+│   ├── analysis-engine/       # Python - Spark / Data Processing
+│   └── dashboard-ui/          # React - Microfrontends Shell
+├── shared/
+│   └── fhir-models/           # Modèles FHIR partagés (TypeScript interfaces/schemas)
+├── gateway-config/            # Configuration WSO2 API Manager (Exports, Certs, etc.)
+├── scripts/                   # Scripts de lancement (.bat ou .ps1)
+└── pnpm-workspace.yaml        # Configuration du Monorepo
 ```
 
-## 6. Flux de données
-### 6.1 Cas d’usage : consultation médicale
-- Le médecin se connecte via IAM
-- Requête vers API Gateway
-- API appelle le serveur FHIR
-- Données patient récupérées
-- Mise à jour via microservice
-- Événement publié dans Kafka
+## 🛠️ Tech Stack & Local Setup
 
-## 7. Sécurité
-### 7.1 Mesures principales
-- Authentification OAuth2 / OpenID Connect
-- Chiffrement TLS
-- Gestion des rôles (RBAC)
-- Audit et traçabilité
-- Anonymisation des données
+### 1. API Gateway (WSO2 API Manager)
+- **Role:** Point d'entrée public unique. Gère le routage, le Rate Limiting, la sécurité (OAuth2/JWT) et l'exposition des APIs vers les applications clientes.
+- **Local Setup:** Binaire WSO2 installé nativement sur Windows (nécessite Java). Tourne typiquement sur `localhost:8243` et `localhost:9443`. Il route les requêtes vers le `ingestion-service`.
 
-### 7.2 Conformité
-- RGPD (si applicable)
-- Normes locales de santé
+### 2. Ingestion Service (Backend Core)
+- **Framework:** NestJS (TypeScript)
+- **Database:** PostgreSQL (JSONB for FHIR resources, Relational for core data)
+- **ORM:** Prisma
+- **Documentation:** Swagger (OpenAPI)
+- **Role:** Exposes FHIR standard APIs, validates payloads, and emits events.
 
-## 8. Interopérabilité
-### 8.1 Standards utilisés
-- HL7 FHIR
-- REST API
-- JSON
+### 2. Messaging Layer (RabbitMQ)
+- **Role:** Asynchronous communication between the ingestion service, orchestrator, and analysis engine.
+- **Local Setup:** Must be installed natively on Windows (e.g., via Chocolatey `choco install rabbitmq`) or as a standalone executable. Runs on `localhost:5672`.
 
-### 8.2 Intégration
-- API REST
-- Webhooks
-- ETL pour systèmes legacy
+### 3. Orchestration Layer (Temporal)
+- **Role:** Manages distributed transactions, long-running processes, and failure retries.
+- **Local Setup:** Use the Temporal CLI (`temporal server start-dev`) to run a local cluster in-memory.
+
+### 4. Analysis Engine
+- **Framework:** Python, PySpark
+- **Role:** Heavy data processing, analytics over patient data stored in Postgres.
+- **Local Setup:** Requires Python 3 installed locally, and Java (for Spark).
+
+### 5. Frontend UI
+- **Framework:** React
+- **Role:** Visual dashboard for providers and admins to view data and orchestrator status.
+
+## 🔄 Data Flow Example
+1. `ingestion-service` receives a FHIR `Patient` JSON via `POST /api/v1/fhir/Patient`.
+2. It validates and saves the JSON to PostgreSQL using Prisma (`FhirResource` JSONB table).
+3. It publishes a `patient.created` event on RabbitMQ.
+4. `orchestrator-worker` or `analysis-engine` listens to the event to trigger further workflows or compute analytics.
+
+## 🚀 Running Locally
+Because we use a PNPM workspace without Docker:
+1. Run `pnpm install` from the root directory to link all apps.
+2. Ensure PostgreSQL, RabbitMQ, and Temporal are running natively on your machine.
+3. Start the API: `cd apps/ingestion-service && pnpm run start:dev`

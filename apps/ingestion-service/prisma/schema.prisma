@@ -68,3 +68,17 @@ model Prescription {
   practitionerId String
   practitioner   Practitioner @relation(fields: [practitionerId], references: [id])
 }
+
+// ─── FHIR Native Storage ─────────────────────────────
+// Stores raw FHIR R4 resources (Synthea-compatible) as JSONB.
+// resourceType: "Patient", "Observation", "Encounter", etc.
+model FhirResource {
+  id           String   @id @default(uuid())
+  resourceType String
+  content      Json
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([resourceType])
+  @@map("fhir_resources")
+}

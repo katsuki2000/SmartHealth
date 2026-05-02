@@ -1,0 +1,7 @@
+{
+  "name": "@smarthealth/fhir-models",
+  "version": "1.0.0",
+  "description": "Shared FHIR interfaces and validation schemas",
+  "main": "index.js",
+  "types": "index.d.ts"
+}

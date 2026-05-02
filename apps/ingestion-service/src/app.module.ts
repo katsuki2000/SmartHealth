@@ -7,33 +7,25 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AppointmentModule } from './appointment/appointment.module';
 import { PrescriptionModule } from './prescription/prescription.module';
 import { FhirModule } from './fhir/fhir.module';
-import { KafkaModule } from './kafka/kafka.module';
+import { RabbitMQModule } from './rabbitmq/rabbitmq.module';
 import { AuthModule } from './auth/auth.module';
-import { APP_GUARD } from '@nestjs/core';
-import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { ConfigModule } from './config/config.module';
 import { LoggingMiddleware } from './common/middleware/logging.middleware';
 
 @Module({
   imports: [
     ConfigModule,
+    PrismaModule,
+    RabbitMQModule,
+    AuthModule,
     PatientModule,
     PractitionerModule,
-    PrismaModule,
     AppointmentModule,
     PrescriptionModule,
     FhirModule,
-    KafkaModule,
-    AuthModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard,
-    },
-  ],
+  providers: [AppService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
