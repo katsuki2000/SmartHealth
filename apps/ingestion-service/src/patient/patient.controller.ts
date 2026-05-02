@@ -19,11 +19,14 @@ import {
 import { PatientService } from './patient.service';
 import { CreatePatientDto } from './create-patient.dto';
 import { FhirPatientDto } from './fhir-patient.dto';
+import { Public } from '../auth/public.decorator';
 
 // ══════════════════════════════════════════════════════════
-// FHIR-Native Controller — routes /fhir/*
+// FHIR-Native Controller — routes /fhir/* (PUBLIC — pas de JWT)
+// Accessible sans token pour permettre l'ingestion Synthea
 // ══════════════════════════════════════════════════════════
 @ApiTags('FHIR Resources')
+@Public()
 @Controller('fhir')
 export class FhirPatientController {
   constructor(private readonly patientService: PatientService) {}

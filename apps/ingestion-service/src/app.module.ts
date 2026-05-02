@@ -9,6 +9,8 @@ import { PrescriptionModule } from './prescription/prescription.module';
 import { FhirModule } from './fhir/fhir.module';
 import { RabbitMQModule } from './rabbitmq/rabbitmq.module';
 import { AuthModule } from './auth/auth.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { ConfigModule } from './config/config.module';
 import { LoggingMiddleware } from './common/middleware/logging.middleware';
 
@@ -25,7 +27,13 @@ import { LoggingMiddleware } from './common/middleware/logging.middleware';
     FhirModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

@@ -21,7 +21,7 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
   private isReady = false;
 
   constructor() {
-    this.url = process.env.RABBITMQ_URL || 'amqp://guest:guest@localhost:5672';
+    this.url = process.env.RABBITMQ_URL || 'amqp://guest:guest@localhost:5673';
     this.exchange = process.env.RABBITMQ_EXCHANGE || 'smarthealth.events';
   }
 
