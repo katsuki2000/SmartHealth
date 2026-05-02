@@ -1,14 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePrescriptionDto } from './create-prescription.dto';
 import { UpdatePrescriptionDto } from './update-prescription.dto';
-import { FhirService } from '../fhir/fhir.service';
+import { EventEmitterService } from '../common/services/event-emitter.service';
 
 @Injectable()
 export class PrescriptionService {
+  private readonly logger = new Logger(PrescriptionService.name);
+
   constructor(
     private prisma: PrismaService,
-    private fhirService: FhirService,
+    private eventEmitter: EventEmitterService,
   ) {}
 
   async create(data: CreatePrescriptionDto) {
@@ -16,7 +18,7 @@ export class PrescriptionService {
       data,
     });
 
-    this.fhirService.syncPrescription(newPrescription).catch(() => {});
+    this.eventEmitter.emitPrescriptionCreated(newPrescription).catch(() => {});
 
     return newPrescription;
   }

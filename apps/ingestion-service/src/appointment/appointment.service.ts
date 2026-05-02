@@ -1,16 +1,16 @@
-import { Injectable, NotFoundException, Inject } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAppointmentDto } from './create-appointment.dto';
 import { UpdateAppointmentDto } from './update-appointment.dto';
-import { FhirService } from '../fhir/fhir.service';
-import { ClientKafka } from '@nestjs/microservices';
+import { EventEmitterService } from '../common/services/event-emitter.service';
 
 @Injectable()
 export class AppointmentService {
+  private readonly logger = new Logger(AppointmentService.name);
+
   constructor(
     private prisma: PrismaService,
-    private fhirService: FhirService,
-    @Inject('KAFKA_SERVICE') private kafkaClient: ClientKafka,
+    private eventEmitter: EventEmitterService,
   ) {}
 
   async create(data: CreateAppointmentDto) {
@@ -18,11 +18,7 @@ export class AppointmentService {
       data,
     });
 
-    // 1. Sync to FHIR Server (External standard)
-    this.fhirService.syncAppointment(newAppointment).catch(() => {});
-
-    // 2. Emit Kafka Event for Internal Microservices 
-    this.kafkaClient.emit('appointment_created', newAppointment);
+    this.eventEmitter.emitAppointmentScheduled(newAppointment).catch(() => {});
 
     return newAppointment;
   }

@@ -1,14 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePractitionerDto } from './create-practitioner.dto';
 import { UpdatePractitionerDto } from './update-practitioner.dto';
-import { FhirService } from '../fhir/fhir.service';
+import { EventEmitterService } from '../common/services/event-emitter.service';
 
 @Injectable()
 export class PractitionerService {
+  private readonly logger = new Logger(PractitionerService.name);
+
   constructor(
     private prisma: PrismaService,
-    private fhirService: FhirService,
+    private eventEmitter: EventEmitterService,
   ) {}
 
   async create(data: CreatePractitionerDto) {
@@ -16,7 +18,10 @@ export class PractitionerService {
       data,
     });
 
-    this.fhirService.syncPractitioner(newPractitioner).catch(() => {});
+    // Fire-and-forget RabbitMQ event
+    this.eventEmitter
+      .emitFhirResourceCreated({ id: newPractitioner.id, resourceType: 'Practitioner' })
+      .catch(() => {});
 
     return newPractitioner;
   }

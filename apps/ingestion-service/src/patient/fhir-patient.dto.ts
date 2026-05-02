@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiExtraModels } from '@nestjs/swagger';
 
 /**
  * DTO for ingesting a raw FHIR R4 Patient resource (Synthea-compatible).
@@ -21,17 +21,7 @@ export class FhirPatientDto {
   })
   id?: string;
 
-  @ApiProperty({
-    description: 'Full FHIR R4 Patient fields (name, gender, birthDate, etc.)',
-    example: {
-      resourceType: 'Patient',
-      id: 'synthea-abc123',
-      name: [{ family: 'Rakoto', given: ['Jean'] }],
-      gender: 'male',
-      birthDate: '1990-01-01',
-      address: [{ use: 'home', city: 'Antananarivo', country: 'MG' }],
-    },
-    additionalProperties: true,
-  })
+  // Index signature — lets TypeScript accept any FHIR field
+  // (no decorator possible here — documented via @ApiBody in the controller)
   [key: string]: any;
 }
