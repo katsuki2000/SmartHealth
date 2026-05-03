@@ -3,6 +3,7 @@ import { ApiOperation, ApiTags, ApiCreatedResponse, ApiOkResponse, ApiBearerAuth
 import { AppointmentService } from './appointment.service';
 import { CreateAppointmentDto } from './create-appointment.dto';
 import { UpdateAppointmentDto } from './update-appointment.dto';
+import { CurrentUser } from '../auth/current-user.decorator';
 
 @ApiTags('appointments')
 @ApiBearerAuth()
@@ -17,11 +18,11 @@ export class AppointmentController {
     return this.appointmentService.create(createAppointmentDto);
   }
 
-  @ApiOperation({ summary: 'Lister tous les rendez-vous' })
+  @ApiOperation({ summary: 'Lister les rendez-vous (filtré par médecin connecté)' })
   @ApiOkResponse({ description: 'Liste des rendez-vous récupérée.' })
   @Get()
-  async findAll() {
-    return this.appointmentService.findAll();
+  async findAll(@CurrentUser() user: any) {
+    return this.appointmentService.findAll(user.userId, user.role);
   }
 
   @ApiOperation({ summary: 'Récupérer un rendez-vous par son ID' })

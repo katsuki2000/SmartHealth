@@ -23,8 +23,18 @@ export class PrescriptionService {
     return newPrescription;
   }
 
-  async findAll() {
+  async findAll(userId: string, role: string) {
+    if (role === 'ADMIN') {
+      return this.prisma.prescription.findMany({
+        include: { patient: true, practitioner: true, appointment: true },
+      });
+    }
+
+    const practitioner = await this.prisma.practitioner.findUnique({ where: { userId } });
+    if (!practitioner) return [];
+
     return this.prisma.prescription.findMany({
+      where: { practitionerId: practitioner.id },
       include: {
         patient: true,
         practitioner: true,

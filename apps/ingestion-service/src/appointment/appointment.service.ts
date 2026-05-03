@@ -23,8 +23,18 @@ export class AppointmentService {
     return newAppointment;
   }
 
-  async findAll() {
+  async findAll(userId: string, role: string) {
+    if (role === 'ADMIN') {
+      return this.prisma.appointment.findMany({
+        include: { patient: true, practitioner: true },
+      });
+    }
+
+    const practitioner = await this.prisma.practitioner.findUnique({ where: { userId } });
+    if (!practitioner) return [];
+
     return this.prisma.appointment.findMany({
+      where: { practitionerId: practitioner.id },
       include: {
         patient: true,
         practitioner: true,

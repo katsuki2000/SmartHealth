@@ -28,13 +28,27 @@ export class AuthService {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(data.password, salt);
 
+    const userRole = data.role || 'DOCTOR';
     const user = await this.prisma.user.create({
       data: {
         email: data.email,
         password: hashedPassword,
-        role: data.role || 'DOCTOR',
+        role: userRole,
       },
     });
+
+    // Créer le profil Practitioner automatiquement si c'est un DOCTOR
+    if (userRole === 'DOCTOR') {
+      await this.prisma.practitioner.create({
+        data: {
+          userId: user.id,
+          firstName: data.firstName || 'À définir',
+          lastName: data.lastName || 'À définir',
+          specialty: data.specialty || 'Généraliste',
+          email: data.email,
+        },
+      });
+    }
 
     // Don't return the password in the response!
     const { password, ...result } = user;

@@ -9,22 +9,29 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  role      String   @default("DOCTOR")
-  createdAt DateTime @default(now())
+  id           String        @id @default(uuid())
+  email        String        @unique
+  password     String
+  role         String        @default("DOCTOR")
+  createdAt    DateTime      @default(now())
+  practitioner Practitioner?
 }
 
 model Patient {
-  id            String         @id @default(uuid())
-  firstName     String
-  lastName      String
-  birthDate     DateTime
-  gender        String
-  appointments  Appointment[]
-  prescriptions Prescription[]
-  createdAt     DateTime       @default(now())
+  id             String         @id @default(uuid())
+  firstName      String
+  lastName       String
+  birthDate      DateTime
+  gender         String
+  
+  // Médecin traitant / Créateur (Optionnel pour supporter FHIR)
+  practitionerId String?
+  practitioner   Practitioner?  @relation(fields: [practitionerId], references: [id])
+
+  appointments   Appointment[]
+  prescriptions  Prescription[]
+  accessLogs     AccessLog[]
+  createdAt      DateTime       @default(now())
 }
 
 model Practitioner {
@@ -34,8 +41,15 @@ model Practitioner {
   specialty     String
   email         String?        @unique
   phone         String?
+  
+  // Lien vers le compte de connexion
+  userId        String?        @unique
+  user          User?          @relation(fields: [userId], references: [id])
+
+  patients      Patient[]
   appointments  Appointment[]
   prescriptions Prescription[]
+  accessLogs    AccessLog[]
   createdAt     DateTime       @default(now())
 }
 
@@ -67,6 +81,18 @@ model Prescription {
   
   practitionerId String
   practitioner   Practitioner @relation(fields: [practitionerId], references: [id])
+}
+
+// ─── Break-The-Glass Audit Logging ────────────────────────
+model AccessLog {
+  id             String       @id @default(uuid())
+  practitionerId String
+  patientId      String
+  reason         String
+  accessedAt     DateTime     @default(now())
+
+  practitioner   Practitioner @relation(fields: [practitionerId], references: [id])
+  patient        Patient      @relation(fields: [patientId], references: [id])
 }
 
 // ─── FHIR Native Storage ─────────────────────────────

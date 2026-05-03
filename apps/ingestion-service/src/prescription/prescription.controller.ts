@@ -4,6 +4,7 @@ import { EventPattern, Payload } from '@nestjs/microservices';
 import { PrescriptionService } from './prescription.service';
 import { CreatePrescriptionDto } from './create-prescription.dto';
 import { UpdatePrescriptionDto } from './update-prescription.dto';
+import { CurrentUser } from '../auth/current-user.decorator';
 
 @ApiTags('prescriptions')
 @ApiBearerAuth()
@@ -26,11 +27,11 @@ export class PrescriptionController {
     return this.prescriptionService.create(createPrescriptionDto);
   }
 
-  @ApiOperation({ summary: 'Lister toutes les prescriptions' })
+  @ApiOperation({ summary: 'Lister les prescriptions (filtré par médecin connecté)' })
   @ApiOkResponse({ description: 'Liste des prescriptions récupérée.' })
   @Get()
-  async findAll() {
-    return this.prescriptionService.findAll();
+  async findAll(@CurrentUser() user: any) {
+    return this.prescriptionService.findAll(user.userId, user.role);
   }
 
   @ApiOperation({ summary: 'Récupérer une prescription par son ID' })

@@ -10,6 +10,7 @@ import {
   HttpStatus,
   UsePipes,
   ValidationPipe,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiOperation,
@@ -22,6 +23,7 @@ import { PatientService } from './patient.service';
 import { CreatePatientDto } from './create-patient.dto';
 import { FhirPatientDto } from './fhir-patient.dto';
 import { Public } from '../auth/public.decorator';
+import { CurrentUser } from '../auth/current-user.decorator';
 
 // ══════════════════════════════════════════════════════════
 // FHIR-Native Controller — routes /fhir/* (PUBLIC — pas de JWT)
@@ -92,16 +94,19 @@ export class FhirPatientController {
 export class PatientController {
   constructor(private readonly patientService: PatientService) {}
 
-  @ApiOperation({ summary: 'Creer un patient (table relationnelle)' })
+  @ApiOperation({ summary: 'Creer un patient (assigné automatiquement au médecin connecté si applicable)' })
   @Post()
-  async create(@Body() createPatientDto: CreatePatientDto) {
-    return this.patientService.create(createPatientDto);
+  async create(
+    @Body() createPatientDto: CreatePatientDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.patientService.create(createPatientDto, user.userId, user.role);
   }
 
-  @ApiOperation({ summary: 'Lister tous les patients' })
+  @ApiOperation({ summary: 'Lister les patients (filtré pour le médecin connecté, sauf ADMIN)' })
   @Get()
-  async findAll() {
-    return this.patientService.findAll();
+  async findAll(@CurrentUser() user: any) {
+    return this.patientService.findAll(user.userId, user.role);
   }
 
   @ApiOperation({ summary: 'Recuperer un patient par son ID' })
@@ -123,5 +128,30 @@ export class PatientController {
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return this.patientService.remove(id);
+  }
+
+  @ApiOperation({ 
+    summary: 'Break The Glass : Accès d\'urgence à un patient hors de la file active',
+    description: 'Permet à un médecin d\'accéder à un dossier patient dont il n\'est pas le médecin traitant. Nécessite une justification.' 
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        reason: { type: 'string', example: 'Urgence vitale suite à un accident de la route' }
+      },
+      required: ['reason']
+    }
+  })
+  @Post(':id/emergency-access')
+  async emergencyAccess(
+    @Param('id') patientId: string,
+    @Body('reason') reason: string,
+    @CurrentUser() user: any,
+  ) {
+    if (!reason) {
+      throw new BadRequestException('La justification (reason) est obligatoire');
+    }
+    return this.patientService.emergencyAccess(patientId, user.userId, reason);
   }
 }
