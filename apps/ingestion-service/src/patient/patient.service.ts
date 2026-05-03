@@ -13,7 +13,8 @@ import { EventEmitterService } from '../common/services/event-emitter.service';
  * PatientService — deux flux de données distincts :
  *
  * 1. FHIR-Native  → POST /api/v1/fhir/Patient
- *    Le body EST le JSON FHIR R4 brut (format Synthea).
+ *    Le body EST le JSON FHIR R4 brut (standard HL7 FHIR R4).
+ *    Accepte toute source : hôpital, laboratoire, appareil médical, dataset de recherche.
  *    Stocké tel quel en JSONB dans la table `fhir_resources`.
  *    Émet fhir.patient.created sur RabbitMQ.
  *

@@ -8,6 +8,8 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import {
   ApiOperation,
@@ -32,18 +34,18 @@ export class FhirPatientController {
   constructor(private readonly patientService: PatientService) {}
 
   @ApiOperation({
-    summary: 'Ingest a FHIR R4 Patient resource (Synthea-compatible)',
+    summary: 'Ingest a FHIR R4 Patient resource',
     description:
-      'Accepts a raw FHIR R4 Patient JSON directly (no wrapper). ' +
+      'Accepts any valid FHIR R4 Patient JSON directly (no wrapper). ' +
       'Stores it in the FhirResource JSONB table and publishes a ' +
       '"fhir.patient.created" event on RabbitMQ.',
   })
   @ApiBody({
     type: FhirPatientDto,
     examples: {
-      synthea_patient: {
-        summary: 'Synthea FHIR R4 Patient',
-        description: 'Le body EST la ressource FHIR directement.',
+      fhir_r4_patient: {
+        summary: 'FHIR R4 Patient',
+        description: 'Le body EST la ressource FHIR R4 directement (hôpital, labo, appareil médical, etc.).',
         value: {
           resourceType: 'Patient',
           id: 'synthea-abc123',
@@ -58,6 +60,7 @@ export class FhirPatientController {
   })
   @ApiResponse({ status: 201, description: 'FHIR Patient stored + event emitted' })
   @ApiResponse({ status: 400, description: 'Invalid resourceType' })
+  @UsePipes(new ValidationPipe({ whitelist: false, forbidNonWhitelisted: false }))
   @HttpCode(HttpStatus.CREATED)
   @Post('Patient')
   async createFhirPatient(@Body() dto: FhirPatientDto) {
