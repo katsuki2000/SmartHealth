@@ -1,0 +1,25 @@
+{
+  "name": "@smarthealth/orchestrator-worker",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Temporal Worker — Orchestration de workflows médicaux distribués",
+  "scripts": {
+    "build": "tsc --build",
+    "start": "ts-node src/worker.ts",
+    "start:client": "ts-node src/client.ts",
+    "dev": "ts-node src/worker.ts"
+  },
+  "dependencies": {
+    "@temporalio/activity": "^1.11.0",
+    "@temporalio/client": "^1.11.0",
+    "@temporalio/worker": "^1.11.0",
+    "@temporalio/workflow": "^1.11.0",
+    "axios": "^1.15.1",
+    "dotenv": "^17.4.2"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3",
+    "@types/node": "^22.10.7"
+  }
+}
