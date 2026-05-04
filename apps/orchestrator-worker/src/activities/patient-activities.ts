@@ -5,9 +5,29 @@
  * En cas d'échec, Temporal gère automatiquement les retries
  * sans que le développeur n'ait à écrire un seul try/catch.
  */
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
 
 const API_URL = process.env.INGESTION_SERVICE_URL || 'http://localhost:3000';
+
+// ─── Token JWT cache (pour ne pas se re-connecter à chaque appel) ───
+let cachedToken: string | null = null;
+
+async function getAuthenticatedClient(): Promise<AxiosInstance> {
+  if (!cachedToken) {
+    console.log('🔑 [Auth] Connexion en tant qu\'admin pour obtenir un token...');
+    const loginResponse = await axios.post(`${API_URL}/auth/login`, {
+      email: 'admin@smarthealth.com',
+      password: 'Admin123!',
+    });
+    cachedToken = loginResponse.data.access_token;
+    console.log('✅ [Auth] Token obtenu !');
+  }
+
+  return axios.create({
+    baseURL: API_URL,
+    headers: { Authorization: `Bearer ${cachedToken}` },
+  });
+}
 
 // ─── Interfaces ──────────────────────────────────────────
 export interface EmergencyPatientInput {
@@ -15,7 +35,7 @@ export interface EmergencyPatientInput {
   lastName: string;
   birthDate: string;
   gender: string;
-  reason: string;   // Motif d'admission d'urgence
+  reason: string;
 }
 
 export interface WorkflowResult {
@@ -25,29 +45,25 @@ export interface WorkflowResult {
   status: string;
 }
 
-// ─── Activity 1 : Créer le patient FHIR ──────────────────
+// ─── Activity 1 : Créer le patient (Relationnel) ───────────
 export async function createEmergencyFhirPatient(
   input: EmergencyPatientInput,
 ): Promise<string> {
-  console.log(`🏥 [Activity] Création du dossier FHIR pour ${input.firstName} ${input.lastName}...`);
+  console.log(`🏥 [Activity] Création du dossier Patient pour ${input.firstName} ${input.lastName}...`);
 
-  const fhirPatient = {
-    resourceType: 'Patient',
-    name: [{ family: input.lastName, given: [input.firstName] }],
+  const client = await getAuthenticatedClient();
+
+  const patientData = {
+    firstName: input.firstName,
+    lastName: input.lastName,
     gender: input.gender,
     birthDate: input.birthDate,
-    extension: [
-      {
-        url: 'http://smarthealth.local/emergency-reason',
-        valueString: input.reason,
-      },
-    ],
   };
 
-  const response = await axios.post(`${API_URL}/fhir/Patient`, fhirPatient);
+  const response = await client.post('/patients', patientData);
   const patientId = response.data.id;
 
-  console.log(`✅ [Activity] Patient FHIR créé — ID: ${patientId}`);
+  console.log(`✅ [Activity] Patient créé — ID: ${patientId}`);
   return patientId;
 }
 
@@ -55,16 +71,14 @@ export async function createEmergencyFhirPatient(
 export async function assignOnCallPractitioner(): Promise<string> {
   console.log(`👨‍⚕️ [Activity] Recherche du praticien de garde...`);
 
-  // En production : on interrogerait une table de planning.
-  // Pour le MVP, on prend le premier praticien disponible.
-  const response = await axios.get(`${API_URL}/practitioners`);
+  const client = await getAuthenticatedClient();
+  const response = await client.get('/practitioners');
   const practitioners = response.data;
 
   if (!practitioners || practitioners.length === 0) {
     throw new Error('Aucun praticien disponible ! Escalade nécessaire.');
   }
 
-  // Sélection round-robin simplifiée (premier praticien trouvé)
   const assigned = practitioners[0];
   console.log(`✅ [Activity] Praticien assigné : ${assigned.firstName} ${assigned.lastName} (${assigned.id})`);
   return assigned.id;
@@ -77,6 +91,7 @@ export async function createEmergencyAppointment(
 ): Promise<string> {
   console.log(`📅 [Activity] Création du rendez-vous d'urgence...`);
 
+  const client = await getAuthenticatedClient();
   const appointmentData = {
     patientId,
     practitionerId,
@@ -85,11 +100,17 @@ export async function createEmergencyAppointment(
     reason: 'Admission urgence — Workflow Temporal',
   };
 
-  const response = await axios.post(`${API_URL}/appointments`, appointmentData);
-  const appointmentId = response.data.id;
+  console.log(`   📦 Données envoyées :`, JSON.stringify(appointmentData, null, 2));
 
-  console.log(`✅ [Activity] Rendez-vous d'urgence créé — ID: ${appointmentId}`);
-  return appointmentId;
+  try {
+    const response = await client.post('/appointments', appointmentData);
+    const appointmentId = response.data.id;
+    console.log(`✅ [Activity] Rendez-vous d'urgence créé — ID: ${appointmentId}`);
+    return appointmentId;
+  } catch (err: any) {
+    console.error(`❌ [Activity] Erreur HTTP ${err.response?.status} :`, JSON.stringify(err.response?.data));
+    throw err;
+  }
 }
 
 // ─── Activity 4 : Notifier le praticien ──────────────────
@@ -102,7 +123,7 @@ export async function notifyPractitioner(
   console.log(`   → Patient: ${patientId}`);
   console.log(`   → Rendez-vous: ${appointmentId}`);
 
-  // En production : on enverrait un email, un SMS, ou un push notification.
-  // Pour le MVP, on émet un log structuré qui sera capté par le monitoring.
+  // En production : email, SMS, ou push notification.
+  // Pour le MVP : log structuré.
   console.log(`✅ [Activity] Praticien notifié avec succès !`);
 }

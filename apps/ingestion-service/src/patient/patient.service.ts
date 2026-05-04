@@ -74,7 +74,7 @@ export class PatientService {
 
   // ─── FLUX 2 : Relational CRUD (Avec Isolation) ───────────────────
   async create(data: CreatePatientDto, userId: string, role: string) {
-    let practitionerId = undefined;
+    let practitionerId: string | undefined = undefined;
     if (role === 'DOCTOR') {
       const practitioner = await this.prisma.practitioner.findUnique({ where: { userId } });
       if (practitioner) practitionerId = practitioner.id;

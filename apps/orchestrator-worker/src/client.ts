@@ -62,5 +62,14 @@ async function run() {
 
 run().catch((err) => {
   console.error('❌ Erreur :', err.message);
+  if (err.cause) {
+    console.error('   📛 Cause :', err.cause.message || err.cause);
+  }
+  if (err.cause?.cause) {
+    console.error('   📛 Détail :', err.cause.cause.message || err.cause.cause);
+  }
+  // Afficher toute la stack pour debug
+  console.error('\n🔍 Stack complète :');
+  console.error(JSON.stringify(err, Object.getOwnPropertyNames(err), 2));
   process.exit(1);
 });

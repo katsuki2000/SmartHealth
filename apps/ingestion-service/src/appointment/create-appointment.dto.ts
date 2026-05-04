@@ -12,8 +12,8 @@ export class CreateAppointmentDto {
   @IsOptional()
   reason?: string;
 
-  @ApiPropertyOptional({ example: 'SCHEDULED', enum: ['SCHEDULED', 'COMPLETED', 'CANCELLED'] })
-  @IsIn(['SCHEDULED', 'COMPLETED', 'CANCELLED'])
+  @ApiPropertyOptional({ example: 'SCHEDULED', enum: ['SCHEDULED', 'COMPLETED', 'CANCELLED', 'EMERGENCY'] })
+  @IsIn(['SCHEDULED', 'COMPLETED', 'CANCELLED', 'EMERGENCY'])
   @IsOptional()
   status?: string;
 
