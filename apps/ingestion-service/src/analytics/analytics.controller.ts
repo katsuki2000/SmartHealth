@@ -12,9 +12,9 @@ import { Public } from '../auth/public.decorator';
 @ApiTags('Analytics')
 @Controller('api/v1/analytics')
 export class AnalyticsController {
-  constructor(private readonly analyticsService: AnalyticsService) {}
+  constructor(private readonly analyticsService: AnalyticsService) { }
 
-  @Get()
+  @Get('summary')
   @Public()
   @ApiOperation({ summary: 'Récupérer les statistiques calculées par PySpark' })
   @ApiResponse({

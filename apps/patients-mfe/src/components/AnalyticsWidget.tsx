@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import './AnalyticsWidget.css'
 
-const API_BASE = 'http://localhost:3000'
+const API_BASE = import.meta.env.VITE_API_BASE ?? ''
 
 interface AnalyticsData {
   totalPatients: number
@@ -135,7 +135,7 @@ export default function AnalyticsWidget() {
 
   useEffect(() => {
     Promise.all([
-      fetch(`${API_BASE}/api/v1/analytics`).then(r => r.json()),
+      fetch(`${API_BASE}/api/v1/analytics/summary`).then(r => r.json()),
       fetch(`${API_BASE}/api/v1/analytics/charts`).then(r => r.json()),
     ])
       .then(([sum, ch]) => {
@@ -321,7 +321,7 @@ export default function AnalyticsWidget() {
       </div>
 
       <div className="aw-source">
-        Source : PySpark Big Data Engine → FHIR JSONB (165K+ ressources) → NestJS API
+        Source : PySpark Big Data Engine → FHIR JSONB (165K+ ressources) → WSO2 API Gateway → NestJS API
       </div>
     </div>
   )
