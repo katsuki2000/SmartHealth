@@ -13,6 +13,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { ConfigModule } from './config/config.module';
 import { LoggingMiddleware } from './common/middleware/logging.middleware';
+import { AnalyticsModule } from './analytics/analytics.module';
+import { OrchestratorModule } from './orchestrator/orchestrator.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { LoggingMiddleware } from './common/middleware/logging.middleware';
     AppointmentModule,
     PrescriptionModule,
     FhirModule,
+    AnalyticsModule,
+    OrchestratorModule,
   ],
   controllers: [AppController],
   providers: [

@@ -8,7 +8,8 @@
  * Usage : pnpm run start (ou pnpm run dev)
  */
 import { Worker, NativeConnection } from '@temporalio/worker';
-import * as activities from './activities/patient-activities';
+import * as patientActivities from './activities/patient-activities';
+import * as analyticsActivities from './activities/analytics-activities';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 
@@ -34,10 +35,13 @@ async function run() {
     connection,
     namespace: process.env.TEMPORAL_NAMESPACE || 'default',
     taskQueue,
-    // Chemin vers les workflows (Temporal les bundle automatiquement)
-    workflowsPath: require.resolve('./workflows/emergency-admission.workflow'),
+    // Chemin vers l'index des workflows
+    workflowsPath: require.resolve('./workflows'),
     // Les activities sont passées directement (elles ont accès au contexte Node.js)
-    activities,
+    activities: {
+      ...patientActivities,
+      ...analyticsActivities,
+    },
   });
 
   console.log('✅ Worker démarré ! En attente de workflows...');

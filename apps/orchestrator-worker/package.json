@@ -7,6 +7,7 @@
     "build": "tsc --build",
     "start": "ts-node src/worker.ts",
     "start:client": "ts-node src/client.ts",
+    "start:cron": "ts-node src/start-cron.ts",
     "dev": "ts-node src/worker.ts"
   },
   "dependencies": {

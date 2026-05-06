@@ -34,7 +34,7 @@ SmartHealth/
 
 ### 2. Messaging Layer (RabbitMQ)
 - **Role:** Asynchronous communication between the ingestion service, orchestrator, and analysis engine.
-- **Local Setup:** Must be installed natively on Windows (e.g., via Chocolatey `choco install rabbitmq`) or as a standalone executable. Runs on `localhost:5672`.
+- **Local Setup:** Must be installed natively on Windows (e.g., via Chocolatey `choco install rabbitmq`) or as a standalone executable. Runs on `localhost:5673`.(should be 5672, but the port is busy).
 
 ### 3. Orchestration Layer (Temporal)
 - **Role:** Manages distributed transactions, long-running processes, and failure retries.

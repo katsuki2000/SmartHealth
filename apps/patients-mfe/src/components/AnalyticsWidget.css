@@ -1,0 +1,334 @@
+/* ═══════════════════════════════════════════════════
+   SmartHealth — Analytics Dashboard Widget
+   Premium dark theme with glassmorphism
+   ═══════════════════════════════════════════════════ */
+
+.aw-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* ── Header ──────────────────────────────────────── */
+.aw-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.aw-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #e2e8f0;
+  letter-spacing: -0.02em;
+}
+
+.aw-subtitle {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 0.15rem;
+}
+
+/* ── KPI Grid ────────────────────────────────────── */
+.aw-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.65rem;
+}
+
+.aw-kpi {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  transition: transform 0.2s, border-color 0.25s, box-shadow 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+
+.aw-kpi::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2.5px;
+  background: var(--kpi-accent);
+  opacity: 0.8;
+}
+
+.aw-kpi:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255,255,255,0.12);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.aw-kpi-icon { font-size: 1.3rem; }
+.aw-kpi-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--kpi-accent);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.aw-kpi-label {
+  font-size: 0.7rem;
+  color: #64748b;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── Highlight Bar ───────────────────────────────── */
+.aw-highlight {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(251,191,36,0.02));
+  border: 1px solid rgba(251,191,36,0.15);
+  border-radius: 12px;
+}
+
+.aw-highlight-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(251,191,36,0.15);
+  color: #fbbf24;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.aw-highlight-name {
+  flex: 1;
+  font-size: 0.82rem;
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+.aw-highlight-count {
+  font-size: 0.82rem;
+  color: #fbbf24;
+  font-weight: 700;
+}
+
+/* ── Tabs ────────────────────────────────────────── */
+.aw-tabs {
+  display: flex;
+  gap: 0.35rem;
+  background: rgba(255,255,255,0.03);
+  border-radius: 12px;
+  padding: 0.25rem;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.aw-tab {
+  flex: 1;
+  padding: 0.55rem 0.5rem;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.aw-tab:hover {
+  color: #94a3b8;
+  background: rgba(255,255,255,0.04);
+}
+
+.aw-tab.active {
+  color: #e2e8f0;
+  background: rgba(129,140,248,0.15);
+  box-shadow: 0 2px 8px rgba(129,140,248,0.15);
+}
+
+/* ── Chart Cards ─────────────────────────────────── */
+.aw-tab-content {
+  min-height: 200px;
+}
+
+.aw-charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.aw-chart-card {
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 1rem;
+}
+
+.aw-chart-card.aw-chart-wide {
+  grid-column: 1 / -1;
+}
+
+.aw-chart-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.01em;
+}
+
+.aw-chart-svg {
+  width: 100%;
+  height: auto;
+}
+
+/* ── Donut ────────────────────────────────────────── */
+.aw-donut-wrap {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.aw-donut-svg {
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+}
+
+.aw-donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+}
+
+.aw-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+}
+
+.aw-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.aw-legend-label {
+  flex: 1;
+  color: #94a3b8;
+}
+
+.aw-legend-val {
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+/* ── Vitals Table ────────────────────────────────── */
+.aw-vitals-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.aw-vt-header {
+  display: grid;
+  grid-template-columns: 2fr 0.6fr 0.6fr 0.6fr;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.aw-vt-row {
+  display: grid;
+  grid-template-columns: 2fr 0.6fr 0.6fr 0.6fr;
+  gap: 0.5rem;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.78rem;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  transition: background 0.15s;
+}
+
+.aw-vt-row:hover {
+  background: rgba(255,255,255,0.03);
+}
+
+.aw-vt-name { color: #cbd5e1; font-weight: 500; }
+.aw-vt-count { color: #94a3b8; text-align: right; }
+.aw-vt-avg { font-weight: 700; text-align: right; }
+.aw-vt-unit { color: #64748b; text-align: right; }
+
+/* ── Source Footer ───────────────────────────────── */
+.aw-source {
+  font-size: 0.68rem;
+  color: #334155;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+
+/* ── States ──────────────────────────────────────── */
+.aw-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2rem;
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.aw-spinner {
+  width: 18px; height: 18px;
+  border: 2px solid rgba(129,140,248,0.3);
+  border-top-color: #818cf8;
+  border-radius: 50%;
+  animation: aw-spin 0.8s linear infinite;
+}
+
+@keyframes aw-spin { to { transform: rotate(360deg); } }
+
+.aw-error {
+  padding: 1rem;
+  background: rgba(239,68,68,0.06);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 10px;
+  font-size: 0.85rem;
+  color: #fca5a5;
+}
+
+.aw-warning {
+  padding: 0.75rem 1rem;
+  background: rgba(245,158,11,0.06);
+  border: 1px solid rgba(245,158,11,0.2);
+  border-radius: 10px;
+  font-size: 0.82rem;
+  color: #fbbf24;
+}
+
+.aw-warning code {
+  background: rgba(245,158,11,0.15);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: #f59e0b;
+}
+
+/* ── Responsive ──────────────────────────────────── */
+@media (max-width: 640px) {
+  .aw-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .aw-charts-grid { grid-template-columns: 1fr; }
+  .aw-donut-wrap { flex-direction: column; }
+  .aw-tabs { flex-wrap: wrap; }
+}

@@ -1,122 +1,253 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import React, { Suspense, lazy, useState, useEffect } from 'react'
+import { useAuth } from './components/AuthContext'
+import Login from './components/Login'
 import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+// Chargement dynamique des Microfrontends (Module Federation)
+const PatientList = lazy(() => import('patients_mfe/PatientList'))
+const EmergencyTrigger = lazy(() => import('patients_mfe/EmergencyTrigger'))
+const AnalyticsWidget = lazy(() => import('patients_mfe/AnalyticsWidget'))
+const AppointmentList = lazy(() => import('patients_mfe/AppointmentList'))
+const PrescriptionList = lazy(() => import('patients_mfe/PrescriptionList'))
 
+const navItems = [
+  { id: 'dashboard', label: 'Tableau de bord', icon: '🏠' },
+  { id: 'patients',  label: 'Patients',        icon: '👥' },
+  { id: 'appointments', label: 'Rendez-vous',  icon: '📅' },
+  { id: 'prescriptions', label: 'Ordonnances', icon: '💊' },
+  { id: 'emergency', label: 'Urgences',         icon: '🚨' },
+  { id: 'analytics', label: 'Analytique',       icon: '📊' },
+]
+
+function MFELoader() {
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+    <div className="mfe-loader">
+      <div className="mfe-spinner" />
+      <span>Chargement du module…</span>
+    </div>
   )
 }
 
-export default App
+function MFEError({ name }: { name: string }) {
+  return (
+    <div className="mfe-error">
+      ⚠️ Le module <strong>{name}</strong> est indisponible.<br />
+      <small>Assurez-vous que <code>patients-mfe</code> tourne sur le port 5001.</small>
+    </div>
+  )
+}
+
+class ErrorBoundary extends React.Component<
+  { name: string; children: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: any) {
+    super(props)
+    this.state = { hasError: false }
+  }
+  static getDerivedStateFromError() { return { hasError: true } }
+  render() {
+    if (this.state.hasError) return <MFEError name={this.props.name} />
+    return this.props.children
+  }
+}
+
+export default function App() {
+  const { isAuthenticated, user, logout } = useAuth()
+  const [activeNav, setActiveNav] = useState('dashboard')
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false)
+  const [theme, setTheme] = useState(() => localStorage.getItem('smarthealth_theme') || 'dark')
+  const now = new Date()
+  const timeStr = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+  const dateStr = now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem('smarthealth_theme', theme)
+  }, [theme])
+
+  const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark')
+
+  const toggleSidebar = () => {
+    if (window.innerWidth <= 768) {
+      setIsMobileMenuOpen(true)
+    } else {
+      setIsDesktopCollapsed(!isDesktopCollapsed)
+    }
+  }
+
+  if (!isAuthenticated) {
+    return <Login />
+  }
+
+  return (
+    <div className={`app-shell ${isDesktopCollapsed ? 'collapsed' : ''}`}>
+      {/* ── Sidebar ──────────────────────────────────── */}
+      <div className={`sidebar-overlay ${isMobileMenuOpen ? 'visible' : ''}`} onClick={() => setIsMobileMenuOpen(false)} />
+      <aside className={`sidebar ${isMobileMenuOpen ? 'open' : ''}`}>
+        <div className="sidebar-logo">
+          <div className="sidebar-logo-icon">🏥</div>
+          <div>
+            <div className="sidebar-logo-name">SmartHealth</div>
+            <div className="sidebar-logo-sub">Portail Clinique</div>
+          </div>
+        </div>
+
+        <nav className="sidebar-nav">
+          {navItems.map(item => (
+            <button
+              key={item.id}
+              className={`sidebar-nav-item ${activeNav === item.id ? 'active' : ''}`}
+              onClick={() => { setActiveNav(item.id); setIsMobileMenuOpen(false); }}
+            >
+              <span className="sidebar-nav-icon">{item.icon}</span>
+              <span className="sidebar-nav-label">{item.label}</span>
+              {item.id === 'emergency' && <span className="sidebar-badge">!</span>}
+            </button>
+          ))}
+        </nav>
+
+        <div className="sidebar-footer">
+          <div className="sidebar-user">
+            <div className="sidebar-user-avatar">{user?.email.slice(0, 2).toUpperCase() || 'U'}</div>
+            <div className="sidebar-user-details">
+              <div className="sidebar-user-name" title={user?.email}>{user?.email.split('@')[0]}</div>
+              <div className="sidebar-user-role">{user?.role?.toUpperCase() === 'ADMIN' ? 'Administrateur' : 'Médecin'}</div>
+            </div>
+            <button className="sidebar-logout-btn" onClick={logout} title="Déconnexion">
+              🚪
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* ── Main ─────────────────────────────────────── */}
+      <div className="main-wrapper">
+        {/* Header */}
+        <header className="header">
+          <div className="header-left">
+            <button className="hamburger-btn" onClick={toggleSidebar}>☰</button>
+            <h1 className="header-title">
+              {navItems.find(n => n.id === activeNav)?.icon}&nbsp;
+              {navItems.find(n => n.id === activeNav)?.label}
+            </h1>
+          </div>
+          <div className="header-right">
+            <button className="theme-toggle" onClick={toggleTheme} title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}>
+              {theme === 'dark' ? '☀️' : '🌙'}
+            </button>
+            <div className="header-time">
+              <div className="header-time-val">{timeStr}</div>
+              <div className="header-time-date">{dateStr}</div>
+            </div>
+            <div className="header-status">
+              <span className="header-status-dot" />
+              <span>Tous les services actifs</span>
+            </div>
+          </div>
+        </header>
+
+        {/* Content */}
+        <main className="main-content">
+          {activeNav === 'dashboard' && (
+            <div className="page-grid">
+              <section className="card card-full">
+                <div className="card-header">
+                  <h2 className="card-title">Bienvenue sur SmartHealth</h2>
+                </div>
+                <p className="card-text">
+                  Plateforme d'interopérabilité médicale — Architecture microservices distribuée avec
+                  orchestration Temporal, analyse Big Data PySpark et microfrontends React.
+                </p>
+                <div className="stack-pills">
+                  {['NestJS', 'Temporal', 'PySpark', 'PostgreSQL', 'Module Federation'].map(t => (
+                    <span key={t} className="pill">{t}</span>
+                  ))}
+                </div>
+              </section>
+
+              <section className="card">
+                <div className="card-header"><h2 className="card-title">📈 Analytics</h2></div>
+                <ErrorBoundary name="AnalyticsWidget">
+                  <Suspense fallback={<MFELoader />}>
+                    <AnalyticsWidget />
+                  </Suspense>
+                </ErrorBoundary>
+              </section>
+
+              <section className="card">
+                <div className="card-header"><h2 className="card-title">🚨 Accès rapide urgence</h2></div>
+                <ErrorBoundary name="EmergencyTrigger">
+                  <Suspense fallback={<MFELoader />}>
+                    <EmergencyTrigger />
+                  </Suspense>
+                </ErrorBoundary>
+              </section>
+            </div>
+          )}
+
+          {activeNav === 'patients' && (
+            <div className="page-grid">
+              <section className="card card-full">
+                <ErrorBoundary name="PatientList">
+                  <Suspense fallback={<MFELoader />}>
+                    <PatientList />
+                  </Suspense>
+                </ErrorBoundary>
+              </section>
+            </div>
+          )}
+
+          {activeNav === 'emergency' && (
+            <div className="page-grid">
+              <section className="card card-full">
+                <ErrorBoundary name="EmergencyTrigger">
+                  <Suspense fallback={<MFELoader />}>
+                    <EmergencyTrigger />
+                  </Suspense>
+                </ErrorBoundary>
+              </section>
+            </div>
+          )}
+
+          {activeNav === 'analytics' && (
+            <div className="page-grid">
+              <section className="card card-full">
+                <ErrorBoundary name="AnalyticsWidget">
+                  <Suspense fallback={<MFELoader />}>
+                    <AnalyticsWidget />
+                  </Suspense>
+                </ErrorBoundary>
+              </section>
+            </div>
+          )}
+
+          {activeNav === 'appointments' && (
+            <div className="page-grid">
+              <section className="card card-full">
+                <ErrorBoundary name="AppointmentList">
+                  <Suspense fallback={<MFELoader />}>
+                    <AppointmentList />
+                  </Suspense>
+                </ErrorBoundary>
+              </section>
+            </div>
+          )}
+
+          {activeNav === 'prescriptions' && (
+            <div className="page-grid">
+              <section className="card card-full">
+                <ErrorBoundary name="PrescriptionList">
+                  <Suspense fallback={<MFELoader />}>
+                    <PrescriptionList />
+                  </Suspense>
+                </ErrorBoundary>
+              </section>
+            </div>
+          )}
+        </main>
+      </div>
+    </div>
+  )
+}
