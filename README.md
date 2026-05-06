@@ -449,15 +449,15 @@ Depuis le dossier `apps/ingestion-service` :
 cd apps/ingestion-service
 
 # Générer le client Prisma
-pnpm dlx prisma generate
+pnpm exec prisma generate
 
 # Appliquer les migrations (crée les tables dans la BDD)
-pnpm dlx prisma migrate deploy
+pnpm exec prisma migrate deploy
 ```
 
 > **Vérification :** Vous pouvez inspecter la base de données via l'interface Prisma Studio :
 > ```bash
-> pnpm dlx prisma studio
+> pnpm exec prisma studio
 > ```
 > Cela ouvrira un navigateur sur `http://localhost:5555` pour visualiser vos tables.
 
@@ -620,7 +620,7 @@ Si vous souhaitez activer la gouvernance API complète :
 - Vérifiez que la base `health_db` existe bien : `psql -U postgres -l`
 
 ### ❌ `MODULE_NOT_FOUND: @prisma/client`
-- Exécutez `pnpm dlx prisma generate` depuis `apps/ingestion-service`
+- Exécutez `pnpm exec prisma generate` depuis `apps/ingestion-service`
 
 ### ❌ `ECONNREFUSED 127.0.0.1:5672` (RabbitMQ)
 - RabbitMQ n'est pas démarré. Lancez le service :
@@ -648,7 +648,7 @@ Si vous souhaitez activer la gouvernance API complète :
 | Installer les dépendances | `pnpm install` (racine du projet) |
 | Installer les deps Python | `pip install -r requirements.txt` (dans `apps/analysis-engine`) |
 | Créer la BDD | `psql -U postgres -c "CREATE DATABASE health_db;"` |
-| Appliquer les migrations | `pnpm dlx prisma generate && pnpm dlx prisma migrate deploy` (dans `apps/ingestion-service`) |
+| Appliquer les migrations | `pnpm exec prisma generate && pnpm exec prisma migrate deploy` (dans `apps/ingestion-service`) |
 | Lancer le Backend | `pnpm run start:dev` (dans `apps/ingestion-service`) |
 | Lancer Temporal Server | `temporal server start-dev` |
 | Lancer le Worker | `pnpm run dev` (dans `apps/orchestrator-worker`) |
