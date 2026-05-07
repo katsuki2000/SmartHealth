@@ -1,0 +1,118 @@
+version: '3.8'
+
+services:
+  # ─── Infrastructure ──────────────────────────────────────────
+  db:
+    image: postgres:15-alpine
+    container_name: smarthealth-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: health_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: smarthealth-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  temporal:
+    image: temporalio/auto-setup:1.22.4
+    container_name: smarthealth-temporal
+    ports:
+      - "7233:7233"
+    environment:
+      - DB=postgresql
+      - DB_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PWD=password
+      - POSTGRES_SEEDS=db
+      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development-sql.yaml
+    depends_on:
+      - db
+
+  temporal-ui:
+    image: temporalio/ui:2.21.3
+    container_name: smarthealth-temporal-ui
+    ports:
+      - "8233:8080"
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+    depends_on:
+      - temporal
+
+  # ─── Microservices ───────────────────────────────────────────
+  ingestion-service:
+    build:
+      context: .
+      dockerfile: apps/ingestion-service/Dockerfile
+    container_name: smarthealth-ingestion
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db:5432/health_db?schema=public
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+      - JWT_SECRET=smart-health-secret-key-2026
+      - TEMPORAL_ADDRESS=temporal:7233
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+      - rabbitmq
+      - temporal
+
+  orchestrator-worker:
+    build:
+      context: .
+      dockerfile: apps/orchestrator-worker/Dockerfile
+    container_name: smarthealth-worker
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - INGESTION_SERVICE_URL=http://ingestion-service:3000
+    depends_on:
+      - temporal
+      - ingestion-service
+
+  analysis-engine:
+    build:
+      context: .
+      dockerfile: apps/analysis-engine/Dockerfile
+    container_name: smarthealth-analysis
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=health_db
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+    depends_on:
+      - db
+    # On laisse le conteneur tourner ou on le lance à la demande
+    restart: "no"
+
+  # ─── Frontends ───────────────────────────────────────────────
+  patients-mfe:
+    build:
+      context: .
+      dockerfile: apps/patients-mfe/Dockerfile
+    container_name: smarthealth-patients-mfe
+    ports:
+      - "5001:5001"
+
+  dashboard-ui:
+    build:
+      context: .
+      dockerfile: apps/dashboard-ui/Dockerfile
+    container_name: smarthealth-dashboard
+    ports:
+      - "5000:5000"
+    depends_on:
+      - patients-mfe
+
+volumes:
+  postgres_data:

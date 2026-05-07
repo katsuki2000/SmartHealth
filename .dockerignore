@@ -1,0 +1,16 @@
+node_modules
+dist
+.git
+*.log
+.env
+.env.*
+! .env.example
+apps/*/node_modules
+apps/*/dist
+apps/*/build
+apps/*/out
+venv
+.venv
+__pycache__
+*.pyc
+hadoop
