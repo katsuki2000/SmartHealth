@@ -96,7 +96,7 @@ function DonutChart({ data, colors }: {
           )
         })}
         <text x={cx} y={cy - 4} textAnchor="middle" fill="#e2e8f0" fontSize="18" fontWeight="700" fontFamily="Inter">{total.toLocaleString()}</text>
-        <text x={cx} y={cy + 12} textAnchor="middle" fill="#64748b" fontSize="9" fontFamily="Inter">total</text>
+        <text x={cx} y={cy + 12} textAnchor="middle" fill="#64748b" fontSize="9" fontFamily="Inter">cas</text>
       </svg>
       <div className="aw-donut-legend">
         {data.map((d, i) => (
@@ -149,7 +149,7 @@ export default function AnalyticsWidget() {
   if (loading) {
     return (
       <div className="aw-container">
-        <div className="aw-header-row"><h2 className="aw-title">📈 Big Data Analytics</h2></div>
+        <div className="aw-header-row"><h2 className="aw-title">📊 Tableau de Bord Clinique</h2></div>
         <div className="aw-loading"><div className="aw-spinner" /><span>Chargement des statistiques…</span></div>
       </div>
     )
@@ -158,8 +158,8 @@ export default function AnalyticsWidget() {
   if (error) {
     return (
       <div className="aw-container">
-        <div className="aw-header-row"><h2 className="aw-title">📈 Big Data Analytics</h2></div>
-        <div className="aw-error">⚠️ Impossible de charger : {error}</div>
+        <div className="aw-header-row"><h2 className="aw-title">📊 Tableau de Bord Clinique</h2></div>
+        <div className="aw-error">⚠️ Données temporairement indisponibles. Veuillez réessayer ultérieurement.</div>
       </div>
     )
   }
@@ -169,21 +169,21 @@ export default function AnalyticsWidget() {
   const c = charts
 
   const statCards = [
-    { label: 'Patients', value: s.totalPatients, icon: '👥', color: COLORS.primary },
-    { label: 'Ressources FHIR', value: s.totalFhirResources, icon: '💾', color: COLORS.success },
-    { label: 'Conditions', value: s.totalConditions, icon: '🦠', color: COLORS.danger },
-    { label: 'Encounters', value: s.totalEncounters, icon: '🏥', color: COLORS.info },
-    { label: 'Observations', value: s.totalObservations, icon: '🩺', color: COLORS.purple },
+    { label: 'Patients Pris en Charge', value: s.totalPatients, icon: '👥', color: COLORS.primary },
+    { label: 'Médecins & Praticiens', value: s.totalPractitioners, icon: '👨‍⚕️', color: COLORS.success },
+    { label: 'Diagnostics Actifs', value: s.totalConditions, icon: '🦠', color: COLORS.danger },
+    { label: 'Séjours & Consultations', value: s.totalEncounters, icon: '🏥', color: COLORS.info },
+    { label: 'Actes Cliniques', value: s.totalObservations, icon: '🩺', color: COLORS.purple },
     { label: 'Âge Moyen', value: `${s.averageAge} ans`, icon: '📊', color: COLORS.warning },
   ]
 
   const computedLabel = s.computedAt ? new Date(s.computedAt).toLocaleString('fr-FR') : 'jamais'
 
   const tabs = [
-    { id: 'overview' as const, label: 'Vue Globale', icon: '🏠' },
-    { id: 'conditions' as const, label: 'Pathologies', icon: '🦠' },
-    { id: 'encounters' as const, label: 'Consultations', icon: '🏥' },
-    { id: 'vitals' as const, label: 'Signes Vitaux', icon: '🩺' },
+    { id: 'overview' as const, label: 'Démographie', icon: '🏠' },
+    { id: 'conditions' as const, label: 'Épidémiologie', icon: '🦠' },
+    { id: 'encounters' as const, label: 'Prise en Charge', icon: '🏥' },
+    { id: 'vitals' as const, label: 'Signes Cliniques', icon: '🩺' },
   ]
 
   return (
@@ -191,18 +191,12 @@ export default function AnalyticsWidget() {
       {/* Header */}
       <div className="aw-header-row">
         <div>
-          <h2 className="aw-title">📈 Big Data Analytics Dashboard</h2>
+          <h2 className="aw-title">📊 Observatoire de Santé de la Population</h2>
           <p className="aw-subtitle">
-            PySpark • {s.totalFhirResources.toLocaleString()} ressources FHIR • calculé : {computedLabel}
+            Analyse épidémiologique • Dernière mise à jour : {computedLabel}
           </p>
         </div>
       </div>
-
-      {noData && (
-        <div className="aw-warning">
-          ⚠️ Aucune donnée. Lancez : <code>python src/pathology_by_age.py</code>
-        </div>
-      )}
 
       {/* KPI Cards */}
       <div className="aw-kpi-grid">
@@ -218,9 +212,9 @@ export default function AnalyticsWidget() {
       {/* Top Pathology Highlight */}
       {s.topPathology && (
         <div className="aw-highlight">
-          <span className="aw-highlight-badge">🏆 Top Pathologie</span>
+          <span className="aw-highlight-badge">🦠 Pathologie Prédominante</span>
           <span className="aw-highlight-name">{s.topPathology}</span>
-          <span className="aw-highlight-count">{s.topPathologyCount} cas</span>
+          <span className="aw-highlight-count">{s.topPathologyCount} cas identifiés</span>
         </div>
       )}
 
@@ -251,21 +245,13 @@ export default function AnalyticsWidget() {
                 colors={BAR_COLORS}
               />
             </div>
-            <div className="aw-chart-card aw-chart-wide">
-              <h3 className="aw-chart-title">Types de ressources FHIR</h3>
-              <BarChart
-                data={c.resourceDistribution.map(r => ({ label: r.name, value: r.count }))}
-                colors={BAR_COLORS}
-                maxBars={10}
-              />
-            </div>
           </div>
         )}
 
         {activeTab === 'conditions' && c && (
           <div className="aw-charts-grid">
             <div className="aw-chart-card aw-chart-wide">
-              <h3 className="aw-chart-title">Top 10 Pathologies (SNOMED CT)</h3>
+              <h3 className="aw-chart-title">Top 10 Pathologies les plus fréquentes</h3>
               <BarChart
                 data={c.topConditions.map(p => ({ label: p.name.replace(/ \(.*\)$/, ''), value: p.count }))}
                 colors={BAR_COLORS}
@@ -289,9 +275,13 @@ export default function AnalyticsWidget() {
               />
             </div>
             <div className="aw-chart-card">
-              <h3 className="aw-chart-title">Volume par classe</h3>
+              <h3 className="aw-chart-title">Volume par type de prise en charge</h3>
               <BarChart
-                data={c.encounterClasses.map(e => ({ label: e.name, value: e.count }))}
+                data={c.encounterClasses.map(e => ({
+                  label: e.name === 'AMB' ? 'Ambulatoire' : e.name === 'IMP' ? 'Hospitalisation'
+                    : e.name === 'EMER' ? 'Urgence' : e.name === 'HH' ? 'Domicile' : e.name === 'VR' ? 'Téléconsultation' : e.name,
+                  value: e.count
+                }))}
                 colors={BAR_COLORS}
               />
             </div>
@@ -301,10 +291,10 @@ export default function AnalyticsWidget() {
         {activeTab === 'vitals' && c && (
           <div className="aw-charts-grid">
             <div className="aw-chart-card aw-chart-wide">
-              <h3 className="aw-chart-title">Top Observations — Valeurs moyennes</h3>
+              <h3 className="aw-chart-title">Analyse des Signes Cliniques (Valeurs Moyennes)</h3>
               <div className="aw-vitals-table">
                 <div className="aw-vt-header">
-                  <span>Mesure</span><span>Nb</span><span>Moyenne</span><span>Unité</span>
+                  <span>Indicateur</span><span>Volume</span><span>Valeur Moy.</span><span>Unité</span>
                 </div>
                 {c.topObservations.map((o, i) => (
                   <div key={i} className="aw-vt-row">
@@ -320,9 +310,7 @@ export default function AnalyticsWidget() {
         )}
       </div>
 
-      <div className="aw-source">
-        Source : PySpark Big Data Engine → FHIR JSONB (165K+ ressources) → WSO2 API Gateway → NestJS API
-      </div>
+
     </div>
   )
 }

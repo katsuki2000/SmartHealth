@@ -72,12 +72,12 @@ export default function PrescriptionList() {
     <div className="pl-container">
       <div className="pl-header">
         <div className="pl-header-left">
-          <h2 className="pl-title">💊 Ordonnances</h2>
-          <span className="pl-badge">{prescriptions.length}</span>
+          <h2 className="pl-title">💊 Historique des Prescriptions</h2>
+          <span className="pl-badge">{prescriptions.length} Ordonnances</span>
         </div>
         <div className="pl-header-actions">
           <button className="pl-btn-add" onClick={() => setIsFormOpen(true)} style={{ color: '#10b981', borderColor: 'rgba(16, 185, 129, 0.3)', background: 'rgba(16, 185, 129, 0.1)' }}>
-            + Nouvelle Ordonnance
+            + Rédiger Prescription
           </button>
         </div>
       </div>

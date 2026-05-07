@@ -80,12 +80,12 @@ export default function AppointmentList() {
     <div className="pl-container">
       <div className="pl-header">
         <div className="pl-header-left">
-          <h2 className="pl-title">📅 Rendez-vous</h2>
-          <span className="pl-badge">{appointments.length}</span>
+          <h2 className="pl-title">📅 Planning des Consultations</h2>
+          <span className="pl-badge">{appointments.length} Actes</span>
         </div>
         <div className="pl-header-actions">
           <button className="pl-btn-add" onClick={() => setIsFormOpen(true)} style={{ color: '#f59e0b', borderColor: 'rgba(245, 158, 11, 0.3)', background: 'rgba(245, 158, 11, 0.1)' }}>
-            + Nouveau RDV
+            + Planifier Acte
           </button>
         </div>
       </div>

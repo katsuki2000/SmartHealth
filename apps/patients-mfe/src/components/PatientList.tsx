@@ -63,7 +63,7 @@ export default function PatientList() {
   }
 
   const deletePatient = async (id: string, name: string) => {
-    if (!confirm(`Supprimer le patient "${name}" ? Cette action est irréversible.`)) return
+    if (!confirm(`Archiver le dossier du patient "${name}" ? Cette action est définitive.`)) return
     try {
       const token = getToken()
       const res = await fetch(`${API_BASE}/patients/${id}`, {
@@ -99,18 +99,18 @@ export default function PatientList() {
     <div className="pl-container">
       <div className="pl-header">
         <div className="pl-header-left">
-          <h2 className="pl-title">👥 Patients enregistrés</h2>
-          <span className="pl-badge">{patients.length}</span>
+          <h2 className="pl-title">👥 Gestion de la File Active</h2>
+          <span className="pl-badge">{patients.length} Dossiers</span>
         </div>
         <div className="pl-header-actions">
           <button className="pl-btn-add" onClick={() => setIsPrescriptionModalOpen(true)} style={{ color: '#10b981', borderColor: 'rgba(16, 185, 129, 0.3)', background: 'rgba(16, 185, 129, 0.1)' }}>
-            📝 Ordonnance
+            📝 Prescription
           </button>
           <button className="pl-btn-add" onClick={() => setIsApptModalOpen(true)} style={{ color: '#f59e0b', borderColor: 'rgba(245, 158, 11, 0.3)', background: 'rgba(245, 158, 11, 0.1)' }}>
-            📅 RDV
+            📅 Planifier Acte
           </button>
           <button className="pl-btn-add" onClick={() => { setEditingPatient(null); setIsModalOpen(true) }}>
-            + Nouveau Patient
+            + Admission Patient
           </button>
         </div>
       </div>
@@ -126,7 +126,7 @@ export default function PatientList() {
               <div className="pl-card-info">
                 <div className="pl-card-name">{p.firstName} {p.lastName}</div>
                 <div className="pl-card-meta">
-                  <span className="pl-tag">{p.gender === 'male' ? '♂' : '♀'} {p.gender}</span>
+                  <span className="pl-tag">{p.gender === 'male' ? '♂ Homme' : '♀ Femme'}</span>
                   <span className="pl-tag">🎂 {calcAge(p.birthDate)} ans</span>
                 </div>
               </div>

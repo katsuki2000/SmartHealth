@@ -52,7 +52,7 @@ export default function Login() {
           )}
 
           <div className="login-group">
-            <label className="login-label" htmlFor="email">Adresse Email</label>
+            <label className="login-label" htmlFor="email">Identifiant Professionnel</label>
             <input
               id="email"
               type="email"
@@ -78,7 +78,7 @@ export default function Login() {
           </div>
 
           <button type="submit" className="login-submit" disabled={loading || !email || !password}>
-            {loading ? 'Authentification...' : 'Se connecter'}
+            {loading ? 'Validation des accès...' : 'Se connecter au portail'}
           </button>
         </form>
 

@@ -74,14 +74,14 @@ export default function EmergencyTrigger() {
       <div className="et-header">
         <div className="et-icon-pulse">🚨</div>
         <div>
-          <h2 className="et-title">Admission Urgence</h2>
-          <p className="et-subtitle">Déclenche le workflow d'admission immédiate</p>
+          <h2 className="et-title">Procédure d'Admission Immédiate</h2>
+          <p className="et-subtitle">Protocole de prise en charge d'urgence automatisé</p>
         </div>
       </div>
 
       {state === 'idle' && (
         <button className="et-btn et-btn-emergency" onClick={handleTrigger}>
-          <span>🏥</span> Déclencher une Urgence
+          <span>🏥</span> Initier Admission Critique
         </button>
       )}
 
@@ -89,8 +89,8 @@ export default function EmergencyTrigger() {
         <div className="et-status et-loading">
           <div className="et-spinner" />
           <div>
-            <div className="et-status-title">Traitement en cours…</div>
-            <div className="et-status-sub">Création patient → Assignation praticien → Rendez-vous</div>
+            <div className="et-status-title">Protocole en cours…</div>
+            <div className="et-status-sub">Identification → Orientation Clinique → Planification Examen</div>
           </div>
         </div>
       )}
@@ -99,14 +99,14 @@ export default function EmergencyTrigger() {
         <div className="et-status et-success">
           <div className="et-check">✓</div>
           <div>
-            <div className="et-status-title">Admission réussie !</div>
+            <div className="et-status-title">Admission Finalisée</div>
             <div className="et-result-grid">
               <div className="et-result-item">
-                <span className="et-result-label">Patient ID</span>
+                <span className="et-result-label">ID Patient</span>
                 <span className="et-result-val">#{result.patientId.slice(0, 8)}</span>
               </div>
               <div className="et-result-item">
-                <span className="et-result-label">Praticien ID</span>
+                <span className="et-result-label">ID Praticien</span>
                 <span className="et-result-val">#{result.practitionerId.slice(0, 8)}</span>
               </div>
               <div className="et-result-item">

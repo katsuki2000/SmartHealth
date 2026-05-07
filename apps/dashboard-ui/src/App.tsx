@@ -11,12 +11,12 @@ const AppointmentList = lazy(() => import('patients_mfe/AppointmentList'))
 const PrescriptionList = lazy(() => import('patients_mfe/PrescriptionList'))
 
 const navItems = [
-  { id: 'dashboard', label: 'Tableau de bord', icon: '🏠' },
-  { id: 'patients',  label: 'Patients',        icon: '👥' },
-  { id: 'appointments', label: 'Rendez-vous',  icon: '📅' },
-  { id: 'prescriptions', label: 'Ordonnances', icon: '💊' },
-  { id: 'emergency', label: 'Urgences',         icon: '🚨' },
-  { id: 'analytics', label: 'Analytique',       icon: '📊' },
+  { id: 'dashboard', label: 'Poste de Travail Clinique', icon: '🏠' },
+  { id: 'patients',  label: 'Dossiers Patients (DPE)',    icon: '👥' },
+  { id: 'appointments', label: 'Planning Consultations',  icon: '📅' },
+  { id: 'prescriptions', label: 'Gestion Prescriptions',  icon: '💊' },
+  { id: 'emergency', label: 'Admission & Urgences',       icon: '🚨' },
+  { id: 'analytics', label: 'Décisionnel Clinique',       icon: '📊' },
 ]
 
 function MFELoader() {
@@ -154,21 +154,17 @@ export default function App() {
             <div className="page-grid">
               <section className="card card-full">
                 <div className="card-header">
-                  <h2 className="card-title">Bienvenue sur SmartHealth</h2>
+                  <h2 className="card-title">Bienvenue sur le Portail SmartHealth</h2>
                 </div>
                 <p className="card-text">
-                  Plateforme d'interopérabilité médicale — Architecture microservices distribuée avec
-                  orchestration Temporal, analyse Big Data PySpark et microfrontends React.
+                  Plateforme d'interopérabilité pour la gestion centralisée des données cliniques,
+                  le suivi automatisé des parcours de soins et l'analyse décisionnelle de santé.
                 </p>
-                <div className="stack-pills">
-                  {['NestJS', 'Temporal', 'PySpark', 'PostgreSQL', 'Module Federation'].map(t => (
-                    <span key={t} className="pill">{t}</span>
-                  ))}
-                </div>
+
               </section>
 
               <section className="card">
-                <div className="card-header"><h2 className="card-title">📈 Analytics</h2></div>
+                <div className="card-header"><h2 className="card-title">📉 Indicateurs de Santé</h2></div>
                 <ErrorBoundary name="AnalyticsWidget">
                   <Suspense fallback={<MFELoader />}>
                     <AnalyticsWidget />
@@ -177,7 +173,7 @@ export default function App() {
               </section>
 
               <section className="card">
-                <div className="card-header"><h2 className="card-title">🚨 Accès rapide urgence</h2></div>
+                <div className="card-header"><h2 className="card-title">🚨 Protocoles d'Urgence</h2></div>
                 <ErrorBoundary name="EmergencyTrigger">
                   <Suspense fallback={<MFELoader />}>
                     <EmergencyTrigger />
