@@ -1,0 +1,374 @@
+/* ─── Patient Detail ──────────────────────────────── */
+.pd-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.pd-back {
+  align-self: flex-start;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  color: var(--accent-light, #818cf8);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.45rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.pd-back:hover {
+  background: rgba(99, 102, 241, 0.15);
+  transform: translateX(-2px);
+}
+
+/* ─── Identity Card ────────────────────────────────── */
+.pd-identity {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  background: var(--bg-surface, #0d1526);
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  border-radius: 14px;
+}
+
+.pd-avatar {
+  width: 56px; height: 56px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+}
+
+.pd-identity-info { flex: 1; }
+
+.pd-name {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--text-primary, #e2e8f0);
+  margin: 0 0 0.3rem;
+}
+
+.pd-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.pd-meta-item {
+  font-size: 0.82rem;
+  color: var(--text-secondary, #94a3b8);
+}
+
+.pd-fhir-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+}
+
+.pd-no-fhir-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #94a3b8;
+  background: rgba(148, 163, 184, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+}
+
+/* ─── Summary Cards ────────────────────────────────── */
+.pd-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.75rem;
+}
+
+.pd-summary-card {
+  background: var(--bg-surface, #0d1526);
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.pd-summary-card:hover {
+  border-color: rgba(99, 102, 241, 0.3);
+  transform: translateY(-2px);
+}
+
+.pd-summary-val {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--accent-light, #818cf8);
+}
+
+.pd-summary-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted, #475569);
+  margin-top: 0.15rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ─── Tabs ─────────────────────────────────────────── */
+.pd-tabs {
+  display: flex;
+  gap: 0.3rem;
+  background: var(--bg-surface, #0d1526);
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  border-radius: 12px;
+  padding: 0.35rem;
+}
+
+.pd-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.6rem 0.5rem;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary, #94a3b8);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.pd-tab:hover { background: rgba(99, 102, 241, 0.06); }
+.pd-tab.active {
+  background: rgba(99, 102, 241, 0.12);
+  color: var(--accent-light, #818cf8);
+  font-weight: 700;
+}
+
+.pd-tab-count {
+  font-size: 0.65rem;
+  font-weight: 800;
+  background: rgba(99, 102, 241, 0.15);
+  color: var(--accent-light, #818cf8);
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  min-width: 18px;
+  text-align: center;
+}
+
+/* ─── Tab Content ──────────────────────────────────── */
+.pd-tab-content {
+  min-height: 200px;
+}
+
+.pd-empty {
+  padding: 2.5rem;
+  text-align: center;
+  color: var(--text-muted, #475569);
+  font-size: 0.88rem;
+  font-style: italic;
+}
+
+/* ─── Timeline ─────────────────────────────────────── */
+.pd-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.pd-timeline::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--border, rgba(255,255,255,0.08));
+}
+
+.pd-timeline-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  position: relative;
+  padding-bottom: 0.75rem;
+}
+
+.pd-timeline-dot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 0.6rem;
+  position: relative;
+  left: -1.5rem;
+  margin-right: -1.5rem;
+  z-index: 1;
+  box-shadow: 0 0 8px rgba(0,0,0,0.3);
+}
+
+.pd-timeline-card {
+  flex: 1;
+  background: var(--bg-surface, #0d1526);
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  transition: border-color 0.2s;
+}
+.pd-timeline-card:hover {
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
+.pd-timeline-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.pd-timeline-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-primary, #e2e8f0);
+}
+
+.pd-timeline-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  font-size: 0.76rem;
+  color: var(--text-secondary, #94a3b8);
+}
+
+/* ─── Badges ───────────────────────────────────────── */
+.pd-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  border: 1px solid;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+/* ─── Vitals Table ─────────────────────────────────── */
+.pd-vitals-table {
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.pd-vt-header {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.2fr;
+  padding: 0.65rem 1rem;
+  background: rgba(99, 102, 241, 0.06);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-secondary, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pd-vt-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.2fr;
+  padding: 0.6rem 1rem;
+  border-top: 1px solid var(--border, rgba(255,255,255,0.05));
+  font-size: 0.82rem;
+  align-items: center;
+  transition: background 0.15s;
+}
+.pd-vt-row:hover {
+  background: rgba(99, 102, 241, 0.04);
+}
+
+.pd-vt-name {
+  font-weight: 600;
+  color: var(--text-primary, #e2e8f0);
+}
+
+.pd-vt-val {
+  font-weight: 700;
+  color: var(--accent-light, #818cf8);
+}
+
+.pd-vt-unit {
+  color: var(--text-muted, #475569);
+  font-size: 0.76rem;
+}
+
+.pd-vt-date {
+  color: var(--text-secondary, #94a3b8);
+  font-size: 0.76rem;
+}
+
+/* ─── Loading & Error ──────────────────────────────── */
+.pd-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 3rem;
+  justify-content: center;
+  color: var(--text-muted, #475569);
+  font-size: 0.88rem;
+}
+
+.pd-spinner {
+  width: 22px; height: 22px;
+  border: 2.5px solid rgba(99,102,241,0.3);
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: pd-spin 0.8s linear infinite;
+}
+
+@keyframes pd-spin { to { transform: rotate(360deg); } }
+
+.pd-error {
+  padding: 1.5rem;
+  background: rgba(239, 68, 68, 0.06);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 10px;
+  color: #fca5a5;
+  font-size: 0.88rem;
+}
+
+/* ─── Responsive ───────────────────────────────────── */
+@media (max-width: 768px) {
+  .pd-summary-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .pd-tabs {
+    flex-wrap: wrap;
+  }
+  .pd-tab {
+    font-size: 0.72rem;
+  }
+  .pd-identity {
+    flex-direction: column;
+    text-align: center;
+  }
+  .pd-meta-row {
+    justify-content: center;
+  }
+  .pd-vt-header,
+  .pd-vt-row {
+    grid-template-columns: 1.5fr 1fr 1fr;
+  }
+  .pd-vt-date {
+    display: none;
+  }
+}

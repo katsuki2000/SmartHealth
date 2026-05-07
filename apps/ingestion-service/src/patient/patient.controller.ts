@@ -130,6 +130,19 @@ export class PatientController {
     return this.patientService.remove(id);
   }
 
+  @ApiOperation({
+    summary: 'Historique clinique FHIR d\'un patient',
+    description:
+      'Récupère les ressources FHIR liées à un patient (Conditions, Observations, Encounters, Medications, Allergies) ' +
+      'en établissant la correspondance entre la table relationnelle et le stockage JSONB FHIR R4.',
+  })
+  @ApiResponse({ status: 200, description: 'Historique clinique récupéré' })
+  @ApiResponse({ status: 404, description: 'Patient non trouvé' })
+  @Get(':id/clinical-history')
+  async getClinicalHistory(@Param('id') id: string) {
+    return this.patientService.getClinicalHistory(id);
+  }
+
   @ApiOperation({ 
     summary: 'Break The Glass : Accès d\'urgence à un patient hors de la file active',
     description: 'Permet à un médecin d\'accéder à un dossier patient dont il n\'est pas le médecin traitant. Nécessite une justification.' 

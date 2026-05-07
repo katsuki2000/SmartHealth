@@ -80,12 +80,11 @@ export default function AppointmentList() {
     <div className="pl-container">
       <div className="pl-header">
         <div className="pl-header-left">
-          <h2 className="pl-title">📅 Planning des Consultations</h2>
-          <span className="pl-badge">{appointments.length} Actes</span>
+          <span className="pl-badge">{appointments.length} consultations</span>
         </div>
         <div className="pl-header-actions">
           <button className="pl-btn-add" onClick={() => setIsFormOpen(true)} style={{ color: '#f59e0b', borderColor: 'rgba(245, 158, 11, 0.3)', background: 'rgba(245, 158, 11, 0.1)' }}>
-            + Planifier Acte
+            + Planifier Consultation
           </button>
         </div>
       </div>
@@ -103,10 +102,12 @@ export default function AppointmentList() {
                 <div className="pl-card-name">
                   {a.patient ? `${a.patient.firstName} ${a.patient.lastName}` : `Patient #${a.patientId.slice(0, 6)}`}
                 </div>
-                <div className="pl-card-meta">
-                  <span className="pl-tag" style={{ color: statusColor[a.status], borderColor: statusColor[a.status] }}>{a.status}</span>
+              <div className="pl-card-meta">
+                  <span className="pl-tag" style={{ color: statusColor[a.status], borderColor: statusColor[a.status] }}>
+                    {a.status === 'EMERGENCY' ? 'Urgence' : a.status === 'SCHEDULED' ? 'Planifié' : a.status === 'COMPLETED' ? 'Terminé' : a.status === 'CANCELLED' ? 'Annulé' : a.status}
+                  </span>
                   <span className="pl-tag">🕐 {new Date(a.dateTime).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
-                  {a.reason && <span className="pl-tag">💬 {a.reason}</span>}
+                  {a.reason && <span className="pl-tag">💬 {a.reason.replace(/ \u2014 Workflow Temporal$/, '').replace(/ depuis le Dashboard$/, '')}</span>}
                 </div>
               </div>
               <div className="pl-card-actions">
