@@ -10,6 +10,7 @@ export default defineConfig({
       filename: 'remoteEntry.js',
       exposes: {
         './PatientList': './src/components/PatientList',
+        './PatientDetail': './src/components/PatientDetail',
         './EmergencyTrigger': './src/components/EmergencyTrigger',
         './AnalyticsWidget': './src/components/AnalyticsWidget',
         './AppointmentList': './src/components/AppointmentList',

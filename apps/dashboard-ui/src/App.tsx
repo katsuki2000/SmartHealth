@@ -5,18 +5,20 @@ import './App.css'
 
 // Chargement dynamique des Microfrontends (Module Federation)
 const PatientList = lazy(() => import('patients_mfe/PatientList'))
+const PatientDetail = lazy(() => import('patients_mfe/PatientDetail'))
 const EmergencyTrigger = lazy(() => import('patients_mfe/EmergencyTrigger'))
 const AnalyticsWidget = lazy(() => import('patients_mfe/AnalyticsWidget'))
 const AppointmentList = lazy(() => import('patients_mfe/AppointmentList'))
 const PrescriptionList = lazy(() => import('patients_mfe/PrescriptionList'))
 
 const navItems = [
-  { id: 'dashboard', label: 'Poste de Travail Clinique', icon: '🏠' },
-  { id: 'patients',  label: 'Dossiers Patients (DPE)',    icon: '👥' },
-  { id: 'appointments', label: 'Planning Consultations',  icon: '📅' },
-  { id: 'prescriptions', label: 'Gestion Prescriptions',  icon: '💊' },
-  { id: 'emergency', label: 'Admission & Urgences',       icon: '🚨' },
-  { id: 'analytics', label: 'Décisionnel Clinique',       icon: '📊' },
+  { id: 'dashboard', label: 'Poste de Travail Clinique', icon: '🏠', roles: ['ADMIN', 'DOCTOR'] },
+  { id: 'patients',  label: 'Dossiers Patients (DPE)',    icon: '👥', roles: ['ADMIN', 'DOCTOR'] },
+  { id: 'appointments', label: 'Planning Consultations',  icon: '📅', roles: ['ADMIN', 'DOCTOR'] },
+  { id: 'prescriptions', label: 'Gestion Prescriptions',  icon: '💊', roles: ['ADMIN', 'DOCTOR'] },
+  { id: 'emergency', label: 'Admission & Urgences',       icon: '🚨', roles: ['ADMIN', 'DOCTOR'] },
+  { id: 'analytics', label: 'Décisionnel Clinique',       icon: '📊', roles: ['ADMIN'] },
+  { id: 'admin',     label: 'Administration Système',     icon: '⚙️', roles: ['ADMIN'] },
 ]
 
 function MFELoader() {
@@ -31,8 +33,8 @@ function MFELoader() {
 function MFEError({ name }: { name: string }) {
   return (
     <div className="mfe-error">
-      ⚠️ Le module <strong>{name}</strong> est indisponible.<br />
-      <small>Assurez-vous que <code>patients-mfe</code> tourne sur le port 5001.</small>
+      ⚠️ Ce module est temporairement indisponible.<br />
+      <small>Veuillez contacter l'administrateur système si le problème persiste.</small>
     </div>
   )
 }
@@ -57,6 +59,7 @@ export default function App() {
   const [activeNav, setActiveNav] = useState('dashboard')
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false)
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null)
   const [theme, setTheme] = useState(() => localStorage.getItem('smarthealth_theme') || 'dark')
   const now = new Date()
   const timeStr = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
@@ -95,7 +98,7 @@ export default function App() {
         </div>
 
         <nav className="sidebar-nav">
-          {navItems.map(item => (
+          {navItems.filter(item => item.roles.includes(user?.role?.toUpperCase() || 'DOCTOR')).map(item => (
             <button
               key={item.id}
               className={`sidebar-nav-item ${activeNav === item.id ? 'active' : ''}`}
@@ -127,11 +130,11 @@ export default function App() {
         {/* Header */}
         <header className="header">
           <div className="header-left">
-            <button className="hamburger-btn" onClick={toggleSidebar}>☰</button>
             <h1 className="header-title">
               {navItems.find(n => n.id === activeNav)?.icon}&nbsp;
               {navItems.find(n => n.id === activeNav)?.label}
             </h1>
+            <button className="hamburger-btn" onClick={toggleSidebar} title="Réduire le menu">☰</button>
           </div>
           <div className="header-right">
             <button className="theme-toggle" onClick={toggleTheme} title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}>
@@ -188,7 +191,14 @@ export default function App() {
               <section className="card card-full">
                 <ErrorBoundary name="PatientList">
                   <Suspense fallback={<MFELoader />}>
-                    <PatientList />
+                    {selectedPatientId ? (
+                      <PatientDetail
+                        patientId={selectedPatientId}
+                        onBack={() => setSelectedPatientId(null)}
+                      />
+                    ) : (
+                      <PatientList onSelectPatient={(id: string) => setSelectedPatientId(id)} />
+                    )}
                   </Suspense>
                 </ErrorBoundary>
               </section>
@@ -239,6 +249,19 @@ export default function App() {
                     <PrescriptionList />
                   </Suspense>
                 </ErrorBoundary>
+              </section>
+            </div>
+          )}
+
+          {activeNav === 'admin' && user?.role?.toUpperCase() === 'ADMIN' && (
+            <div className="page-grid">
+              <section className="card card-full">
+                <div className="card-header">
+                  <h2 className="card-title">⚙️ Administration Système</h2>
+                </div>
+                <p className="card-text">
+                  Bienvenue dans l'espace d'administration. (Panneau de gestion du personnel à venir).
+                </p>
               </section>
             </div>
           )}

@@ -1,6 +1,11 @@
 declare module 'patients_mfe/PatientList' {
-  const PatientList: React.ComponentType
+  const PatientList: React.ComponentType<{ onSelectPatient?: (id: string) => void }>
   export default PatientList
+}
+
+declare module 'patients_mfe/PatientDetail' {
+  const PatientDetail: React.ComponentType<{ patientId: string; onBack: () => void }>
+  export default PatientDetail
 }
 
 declare module 'patients_mfe/EmergencyTrigger' {

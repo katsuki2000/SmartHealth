@@ -1,7 +1,9 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AnalyticsService } from './analytics.service';
-import { Public } from '../auth/public.decorator';
+import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
+import { UseGuards } from '@nestjs/common';
 
 /**
  * AnalyticsController
@@ -15,7 +17,8 @@ export class AnalyticsController {
   constructor(private readonly analyticsService: AnalyticsService) { }
 
   @Get('summary')
-  @Public()
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN')
   @ApiOperation({ summary: 'Récupérer les statistiques calculées par PySpark' })
   @ApiResponse({
     status: 200,
@@ -26,7 +29,8 @@ export class AnalyticsController {
   }
 
   @Get('charts')
-  @Public()
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN')
   @ApiOperation({ summary: 'Données pour les graphiques (FHIR JSONB)' })
   @ApiResponse({
     status: 200,
@@ -37,7 +41,8 @@ export class AnalyticsController {
   }
 
   @Get('live')
-  @Public()
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN')
   @ApiOperation({ summary: 'Statistiques en temps réel (requêtes directes PostgreSQL)' })
   @ApiResponse({
     status: 200,

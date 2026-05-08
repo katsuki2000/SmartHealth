@@ -32,7 +32,7 @@ async function triggerEmergencyWorkflow(): Promise<WorkflowResult> {
       lastName: `Patient-${Date.now().toString().slice(-4)}`,
       birthDate: '1985-06-15',
       gender: 'male',
-      reason: 'Admission urgence depuis le Dashboard'
+      reason: 'Admission en urgence'
     }),
   })
 
@@ -102,24 +102,24 @@ export default function EmergencyTrigger() {
             <div className="et-status-title">Admission Finalisée</div>
             <div className="et-result-grid">
               <div className="et-result-item">
-                <span className="et-result-label">ID Patient</span>
-                <span className="et-result-val">#{result.patientId.slice(0, 8)}</span>
+                <span className="et-result-label">N° Dossier</span>
+                <span className="et-result-val">DPE-{result.patientId.slice(0, 6).toUpperCase()}</span>
               </div>
               <div className="et-result-item">
-                <span className="et-result-label">ID Praticien</span>
-                <span className="et-result-val">#{result.practitionerId.slice(0, 8)}</span>
+                <span className="et-result-label">Médecin Assigné</span>
+                <span className="et-result-val">Dr. #{result.practitionerId.slice(0, 6).toUpperCase()}</span>
               </div>
               <div className="et-result-item">
-                <span className="et-result-label">RDV ID</span>
-                <span className="et-result-val">#{result.appointmentId.slice(0, 8)}</span>
+                <span className="et-result-label">Consultation</span>
+                <span className="et-result-val">RDV-{result.appointmentId.slice(0, 6).toUpperCase()}</span>
               </div>
               <div className="et-result-item">
                 <span className="et-result-label">Statut</span>
-                <span className="et-result-val et-result-status">{result.status}</span>
+                <span className="et-result-val et-result-status">{result.status === 'ADMITTED' ? 'Pris en charge' : result.status}</span>
               </div>
             </div>
           </div>
-          <button className="et-btn-reset" onClick={handleReset}>Nouvelle urgence</button>
+          <button className="et-btn-reset" onClick={handleReset}>Nouvelle admission</button>
         </div>
       )}
 
