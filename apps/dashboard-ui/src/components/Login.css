@@ -40,6 +40,7 @@
   display: inline-block;
   background: linear-gradient(135deg, #6366f1, #a855f7);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
 }
@@ -156,11 +157,4 @@
   cursor: not-allowed;
 }
 
-.login-demo-hint {
-  text-align: center;
-  margin-top: 24px;
-  font-size: 0.8rem;
-  color: #64748b;
-  padding-top: 24px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-}
+

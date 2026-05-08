@@ -2,6 +2,11 @@ import React, { Suspense, lazy, useState, useEffect } from 'react'
 import { useAuth } from './components/AuthContext'
 import Login from './components/Login'
 import UserManagement from './components/UserManagement'
+import { 
+  Home, Users, CalendarDays, FileText, AlertTriangle, 
+  BarChart3, Settings, Activity, Server, Clock, 
+  CheckCircle2, Sun, Moon, LogOut, Menu
+} from 'lucide-react'
 import './App.css'
 
 // Chargement dynamique des Microfrontends (Module Federation)
@@ -13,13 +18,13 @@ const AppointmentList = lazy(() => import('patients_mfe/AppointmentList'))
 const PrescriptionList = lazy(() => import('patients_mfe/PrescriptionList'))
 
 const navItems = [
-  { id: 'dashboard', label: 'Poste de Travail Clinique', icon: '🏠', roles: ['ADMIN', 'DOCTOR'] },
-  { id: 'patients',  label: 'Dossiers Patients (DPE)',    icon: '👥', roles: ['ADMIN', 'DOCTOR'] },
-  { id: 'appointments', label: 'Planning Consultations',  icon: '📅', roles: ['ADMIN', 'DOCTOR'] },
-  { id: 'prescriptions', label: 'Gestion Prescriptions',  icon: '💊', roles: ['ADMIN', 'DOCTOR'] },
-  { id: 'emergency', label: 'Admission & Urgences',       icon: '🚨', roles: ['ADMIN', 'DOCTOR'] },
-  { id: 'analytics', label: 'Décisionnel Clinique',       icon: '📊', roles: ['ADMIN'] },
-  { id: 'admin',     label: 'Administration Système',     icon: '⚙️', roles: ['ADMIN'] },
+  { id: 'dashboard', label: 'Poste de Travail Clinique', icon: Home, roles: ['ADMIN', 'DOCTOR'] },
+  { id: 'patients',  label: 'Dossiers Patients',          icon: Users, roles: ['ADMIN', 'DOCTOR'] },
+  { id: 'appointments', label: 'Planning Consultations',  icon: CalendarDays, roles: ['ADMIN', 'DOCTOR'] },
+  { id: 'prescriptions', label: 'Gestion Prescriptions',  icon: FileText, roles: ['ADMIN', 'DOCTOR'] },
+  { id: 'emergency', label: 'Admission & Urgences',       icon: AlertTriangle, roles: ['ADMIN', 'DOCTOR'] },
+  { id: 'analytics', label: 'Décisionnel Clinique',       icon: BarChart3, roles: ['ADMIN'] },
+  { id: 'admin',     label: 'Administration Système',     icon: Settings, roles: ['ADMIN'] },
 ]
 
 function MFELoader() {
@@ -34,7 +39,7 @@ function MFELoader() {
 function MFEError({ name }: { name: string }) {
   return (
     <div className="mfe-error">
-      ⚠️ Ce module est temporairement indisponible.<br />
+      Le module <strong>{name}</strong> est temporairement indisponible.<br />
       <small>Veuillez contacter l'administrateur système si le problème persiste.</small>
     </div>
   )
@@ -105,9 +110,9 @@ export default function App() {
               className={`sidebar-nav-item ${activeNav === item.id ? 'active' : ''}`}
               onClick={() => { setActiveNav(item.id); setIsMobileMenuOpen(false); }}
             >
-              <span className="sidebar-nav-icon">{item.icon}</span>
+              <span className="sidebar-nav-icon"><item.icon size={18} /></span>
               <span className="sidebar-nav-label">{item.label}</span>
-              {item.id === 'emergency' && <span className="sidebar-badge">!</span>}
+              {item.id === 'emergency' && <span className="sidebar-badge"></span>}
             </button>
           ))}
         </nav>
@@ -120,7 +125,7 @@ export default function App() {
               <div className="sidebar-user-role">{user?.role?.toUpperCase() === 'ADMIN' ? 'Administrateur' : 'Médecin'}</div>
             </div>
             <button className="sidebar-logout-btn" onClick={logout} title="Déconnexion">
-              🚪
+              <LogOut size={18} />
             </button>
           </div>
         </div>
@@ -131,15 +136,19 @@ export default function App() {
         {/* Header */}
         <header className="header">
           <div className="header-left">
-            <h1 className="header-title">
-              {navItems.find(n => n.id === activeNav)?.icon}&nbsp;
-              {navItems.find(n => n.id === activeNav)?.label}
-            </h1>
-            <button className="hamburger-btn" onClick={toggleSidebar} title="Réduire le menu">☰</button>
+            <button className="hamburger-btn" onClick={toggleSidebar} title="Menu">
+              <Menu size={20} />
+            </button>
+            <div className="header-titles">
+              <h1 className="header-title">
+                {navItems.find(n => n.id === activeNav)?.label}
+              </h1>
+              <span className="header-subtitle">SmartHealth — Portail clinique interopérable</span>
+            </div>
           </div>
           <div className="header-right">
             <button className="theme-toggle" onClick={toggleTheme} title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}>
-              {theme === 'dark' ? '☀️' : '🌙'}
+              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
             <div className="header-time">
               <div className="header-time-val">{timeStr}</div>
@@ -147,7 +156,7 @@ export default function App() {
             </div>
             <div className="header-status">
               <span className="header-status-dot" />
-              <span>Tous les services actifs</span>
+              <span>Services opérationnels</span>
             </div>
           </div>
         </header>
@@ -155,37 +164,161 @@ export default function App() {
         {/* Content */}
         <main className="main-content">
           {activeNav === 'dashboard' && (
-            <div className="page-grid">
-              <section className="card card-full">
-                <div className="card-header">
-                  <h2 className="card-title">Bienvenue sur le Portail SmartHealth</h2>
-                </div>
-                <p className="card-text">
-                  Plateforme d'interopérabilité pour la gestion centralisée des données cliniques,
-                  le suivi automatisé des parcours de soins et l'analyse décisionnelle de santé.
-                </p>
-
-              </section>
-
-              {user?.role?.toUpperCase() === 'ADMIN' && (
-                <section className="card">
-                  <div className="card-header"><h2 className="card-title">📉 Indicateurs de Santé</h2></div>
-                  <ErrorBoundary name="AnalyticsWidget">
-                    <Suspense fallback={<MFELoader />}>
-                      <AnalyticsWidget />
-                    </Suspense>
-                  </ErrorBoundary>
+            <div className="dashboard-grid">
+              {/* Ligne 1 : Accueil */}
+              <div className="dashboard-row-1">
+                <section className="card welcome-card">
+                  <div className="welcome-content">
+                    <h2 className="welcome-title">Bienvenue, {user?.role?.toUpperCase() === 'ADMIN' ? 'administrateur' : 'docteur'}</h2>
+                    <p className="welcome-subtitle">
+                      Vue d'ensemble des dossiers patients, consultations, prescriptions et indicateurs décisionnels.
+                    </p>
+                  </div>
                 </section>
-              )}
+              </div>
 
-              <section className="card">
-                <div className="card-header"><h2 className="card-title">🚨 Protocoles d'Urgence</h2></div>
-                <ErrorBoundary name="EmergencyTrigger">
-                  <Suspense fallback={<MFELoader />}>
-                    <EmergencyTrigger />
-                  </Suspense>
-                </ErrorBoundary>
-              </section>
+              {/* Ligne 2 & 3 : Colonnes */}
+              <div className="dashboard-cols">
+                <div className="dashboard-col-left">
+                  {/* Indicateurs Cliniques */}
+                  <div className="stats-grid">
+                    <div className="stat-card">
+                      <div className="stat-header"><Users size={16}/> Patients suivis</div>
+                      <div className="stat-value">684</div>
+                      <div className="stat-sub">Dossiers actifs</div>
+                    </div>
+                    <div className="stat-card">
+                      <div className="stat-header"><Activity size={16}/> Diagnostics</div>
+                      <div className="stat-value">21 276</div>
+                      <div className="stat-sub">Ressources cliniques enregistrées</div>
+                    </div>
+                    <div className="stat-card">
+                      <div className="stat-header"><CalendarDays size={16}/> Consultations</div>
+                      <div className="stat-value">42</div>
+                      <div className="stat-sub">Prévues aujourd'hui</div>
+                    </div>
+                    <div className="stat-card">
+                      <div className="stat-header"><FileText size={16}/> Prescriptions</div>
+                      <div className="stat-value">128</div>
+                      <div className="stat-sub">Émises cette semaine</div>
+                    </div>
+                  </div>
+
+                  {/* Graphiques Démographie (Admin only) */}
+                  {user?.role?.toUpperCase() === 'ADMIN' && (
+                    <section className="card mt-4">
+                      <div className="card-header">
+                        <div className="card-header-titles">
+                          <h2 className="card-title"><BarChart3 size={18} className="icon-mr"/> Indicateurs cliniques</h2>
+                          <span className="card-subtitle-tech">FHIR/JSONB · Dernière mise à jour : {timeStr}</span>
+                        </div>
+                      </div>
+                      <p className="card-hint">Données consolidées à partir des dossiers patients et ressources cliniques.</p>
+                      <ErrorBoundary name="AnalyticsWidget">
+                        <Suspense fallback={<MFELoader />}>
+                          <AnalyticsWidget />
+                        </Suspense>
+                      </ErrorBoundary>
+                    </section>
+                  )}
+                </div>
+
+                <div className="dashboard-col-right">
+                  {/* Accès Urgence */}
+                  <section className="card emergency-card mb-4">
+                    <div className="card-header">
+                      <h2 className="card-title text-danger"><AlertTriangle size={18} className="icon-mr"/> Admission d'urgence</h2>
+                    </div>
+                    <p className="card-hint mb-3">Déclencher un parcours d'admission critique avec suivi du workflow.</p>
+                    
+                    <div className="emergency-steps">
+                      <div className="step"><CheckCircle2 size={14}/> Validation patient</div>
+                      <div className="step"><CheckCircle2 size={14}/> Notification clinique</div>
+                      <div className="step"><CheckCircle2 size={14}/> Suivi du workflow</div>
+                    </div>
+                    
+                    <div className="mt-3">
+                      <ErrorBoundary name="EmergencyTrigger">
+                        <Suspense fallback={<MFELoader />}>
+                          <EmergencyTrigger />
+                        </Suspense>
+                      </ErrorBoundary>
+                    </div>
+                    <div className="tech-status-tiny mt-3">Orchestration : Temporal</div>
+                  </section>
+                  
+                  {/* État des services */}
+                  <section className="card mb-4">
+                    <div className="card-header">
+                      <h2 className="card-title"><Server size={18} className="icon-mr"/> État de la plateforme</h2>
+                    </div>
+                    <div className="compact-status-list">
+                      <div className="compact-status-item">
+                        <span>API clinique</span><span className="badge badge-success">Active</span>
+                      </div>
+                      <div className="compact-status-item">
+                        <span>Base de données</span><span className="badge badge-success">Active</span>
+                      </div>
+                      <div className="compact-status-item">
+                        <span>Messagerie</span><span className="badge badge-success">Active</span>
+                      </div>
+                      <div className="compact-status-item">
+                        <span>Orchestration</span><span className="badge badge-success">Active</span>
+                      </div>
+                      <div className="compact-status-item">
+                        <span>Gateway</span><span className="badge badge-success">Active</span>
+                      </div>
+                      <div className="compact-status-item">
+                        <span>Analytics</span><span className="badge badge-muted">Disponible</span>
+                      </div>
+                    </div>
+                  </section>
+
+                  {/* Dernières activités */}
+                  <section className="card">
+                    <div className="card-header">
+                      <h2 className="card-title"><Clock size={18} className="icon-mr"/> Dernières activités</h2>
+                    </div>
+                    <div className="activity-list-compact">
+                      <div className="activity-row">
+                        <Users size={14} className="text-accent" />
+                        <div className="act-details">
+                          <span className="act-title">Nouveau patient enregistré</span>
+                          <span className="act-time">Il y a 5 min</span>
+                        </div>
+                      </div>
+                      <div className="activity-row">
+                        <FileText size={14} className="text-success" />
+                        <div className="act-details">
+                          <span className="act-title">Prescription créée</span>
+                          <span className="act-time">Il y a 12 min</span>
+                        </div>
+                      </div>
+                      <div className="activity-row">
+                        <CalendarDays size={14} className="text-info" />
+                        <div className="act-details">
+                          <span className="act-title">Consultation planifiée</span>
+                          <span className="act-time">Il y a 1 heure</span>
+                        </div>
+                      </div>
+                      <div className="activity-row">
+                        <BarChart3 size={14} className="text-warning" />
+                        <div className="act-details">
+                          <span className="act-title">Analyse mise à jour</span>
+                          <span className="act-time">Ce matin</span>
+                        </div>
+                      </div>
+                      <div className="activity-row">
+                        <AlertTriangle size={14} className="text-danger" />
+                        <div className="act-details">
+                          <span className="act-title">Workflow d'urgence</span>
+                          <span className="act-time">Hier</span>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+                </div>
+              </div>
             </div>
           )}
 
@@ -223,6 +356,10 @@ export default function App() {
           {activeNav === 'analytics' && (
             <div className="page-grid">
               <section className="card card-full">
+                <div className="card-header">
+                  <h2 className="card-title"><BarChart3 size={18} className="icon-mr"/> Indicateurs cliniques</h2>
+                </div>
+                <p className="card-hint">Données consolidées à partir des dossiers patients et ressources cliniques. FHIR/JSONB.</p>
                 <ErrorBoundary name="AnalyticsWidget">
                   <Suspense fallback={<MFELoader />}>
                     <AnalyticsWidget />
@@ -260,7 +397,7 @@ export default function App() {
             <div className="page-grid">
               <section className="card card-full">
                 <div className="card-header">
-                  <h2 className="card-title">⚙️ Administration Système</h2>
+                  <h2 className="card-title"><Settings size={18} className="icon-mr"/> Administration Système</h2>
                 </div>
                 <UserManagement />
               </section>

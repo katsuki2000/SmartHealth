@@ -35,7 +35,7 @@ async function bootstrap() {
   // Setup Swagger documentation
   const config = new DocumentBuilder()
     .setTitle('SmartHealth API')
-    .setDescription('Documentation interactive de l API SmartHealth')
+    .setDescription("Documentation interactive de l'API SmartHealth — Plateforme de santé interopérable FHIR R4")
     .setVersion('1.0')
     .addBearerAuth()
     .build();

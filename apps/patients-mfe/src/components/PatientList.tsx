@@ -106,7 +106,7 @@ export default function PatientList({ onSelectPatient }: { onSelectPatient?: (id
             📝 Prescription
           </button>
           <button className="pl-btn-add" onClick={() => setIsApptModalOpen(true)} style={{ color: '#f59e0b', borderColor: 'rgba(245, 158, 11, 0.3)', background: 'rgba(245, 158, 11, 0.1)' }}>
-            📅 Planifier Acte
+            📅 Planifier RDV
           </button>
           <button className="pl-btn-add" onClick={() => { setEditingPatient(null); setIsModalOpen(true) }}>
             + Admission Patient

@@ -2,12 +2,6 @@
  * ═══════════════════════════════════════════════════════════════
  * Script d'Import Synthea → SmartHealth
  * ═══════════════════════════════════════════════════════════════
- *
- * Lit les fichiers FHIR R4 Bundle générés par Synthea et les importe dans :
- *   1. La table `fhir_resources` (JSONB) — TOUTES les ressources brutes
- *   2. La table `Patient` (relationnelle) — pour les analyses PySpark
- *
- * Usage : npx ts-node scripts/import-synthea.ts
  */
 import { PrismaClient } from '@prisma/client';
 import * as fs from 'fs';

@@ -2,25 +2,25 @@
 
 /* ─── Design System (Dark Theme - Default) ─────────── */
 :root {
-  --bg-base:       #060b18;
-  --bg-surface:    #0d1526;
-  --bg-elevated:   #121d35;
-  --bg-glass:      rgba(255,255,255,0.04);
-  --bg-glass-hover:rgba(255,255,255,0.07);
+  --bg-base:       #020617; /* Very dark night blue */
+  --bg-surface:    #0f172a; /* Slate 900 for cards */
+  --bg-elevated:   #1e293b; /* Slate 800 */
+  --bg-glass:      rgba(248, 250, 252, 0.02);
+  --bg-glass-hover:rgba(248, 250, 252, 0.05);
 
-  --border:        rgba(255,255,255,0.08);
-  --border-focus:  rgba(99,102,241,0.4);
+  --border:        rgba(148, 163, 184, 0.1);
+  --border-focus:  rgba(14, 165, 233, 0.4);
 
-  --text-primary:  #e2e8f0;
-  --text-secondary:#94a3b8;
-  --text-muted:    #475569;
+  --text-primary:  #f8fafc;
+  --text-secondary:#cbd5e1;
+  --text-muted:    #64748b;
 
-  --accent:        #6366f1;
-  --accent-light:  #818cf8;
-  --accent-glow:   rgba(99,102,241,0.25);
+  --accent:        #0ea5e9; /* Sky blue, clinical */
+  --accent-light:  #38bdf8;
+  --accent-glow:   rgba(14, 165, 233, 0.1); /* Reduced glow */
 
-  --emergency:     #ef4444;
-  --success:       #10b981;
+  --emergency:     #ef4444; /* Only for emergencies */
+  --success:       #10b981; /* Only for active statuses */
   --warning:       #f59e0b;
 
   --sidebar-w:     260px;
@@ -44,8 +44,8 @@
   --border-focus:  rgba(79, 70, 229, 0.4);
 
   --text-primary:  #0f172a;
-  --text-secondary:#475569;
-  --text-muted:    #94a3b8;
+  --text-secondary:#334155;
+  --text-muted:    #64748b;
 
   --accent:        #4f46e5;
   --accent-light:  #6366f1;

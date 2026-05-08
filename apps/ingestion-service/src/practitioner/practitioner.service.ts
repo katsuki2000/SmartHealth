@@ -27,7 +27,11 @@ export class PractitionerService {
   }
 
   async findAll() {
-    return this.prisma.practitioner.findMany();
+    return this.prisma.practitioner.findMany({
+      include: {
+        user: true,
+      },
+    });
   }
 
   async findOne(id: string) {

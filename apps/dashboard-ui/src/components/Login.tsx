@@ -93,9 +93,6 @@ export default function Login() {
           </button>
         </form>
 
-        <div className="login-demo-hint">
-          Accès Démo : <code>admin@smarthealth.com</code> / <code>Admin123!</code>
-        </div>
       </div>
     </div>
   );

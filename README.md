@@ -1,10 +1,10 @@
-# 🏥 SmartHealth — Plateforme d'Interopérabilité et de Gouvernance de Données de Santé
+# SmartHealth — Plateforme de Santé Interopérable
 
 SmartHealth est un projet d'architecture orientée **microservices** conçu pour la **Gouvernance de Données de Santé** à grande échelle. Le système gère l'ingestion massive de données au format standard **FHIR R4**, l'analyse Big Data via **Apache Spark**, l'orchestration de workflows cliniques critiques via **Temporal.io**, et la sécurisation des accès via une **API Gateway WSO2**.
 
 ---
 
-## 📑 Table des matières
+## Table des matières
 
 - [Architecture Globale](#-architecture-globale-et-technologies)
 - [Fonctionnalités Clés](#-fonctionnalités-clés)
@@ -27,15 +27,15 @@ Le projet est structuré sous forme de **Monorepo** (géré par `pnpm workspaces
 ```
 SmartHealth/
 ├── apps/
-│   ├── ingestion-service/    # 🟢 Backend NestJS (API REST + FHIR + RabbitMQ)
-│   ├── orchestrator-worker/  # ⚙️  Worker Temporal.io (Workflows distribués)
-│   ├── analysis-engine/      # 📊 Moteur PySpark (Big Data Analytics)
-│   ├── dashboard-ui/         # 🖥️  Shell React (Micro-Frontend Host)
-│   └── patients-mfe/         # 🧩 Micro-Frontend Patients (Module Federation)
-├── scripts/                  # 📜 Scripts utilitaires (import Synthea, etc.)
-├── shared/                   # 📦 Code partagé entre les apps
-├── gateway-config/           # 🔐 Configuration WSO2 API Manager
-└── pnpm-workspace.yaml       # ⚡ Configuration du monorepo
+│   ├── ingestion-service/    #  Backend NestJS (API REST + FHIR + RabbitMQ)
+│   ├── orchestrator-worker/  #  Worker Temporal.io (Workflows distribués)
+│   ├── analysis-engine/      #  Moteur PySpark (Big Data Analytics)
+│   ├── dashboard-ui/         #  Shell React (Micro-Frontend Host)
+│   └── patients-mfe/         #  Micro-Frontend Patients (Module Federation)
+├── scripts/                  #  Scripts utilitaires (import Synthea, etc.)
+├── shared/                   #  Code partagé entre les apps
+├── gateway-config/           #  Configuration WSO2 API Manager
+└── pnpm-workspace.yaml       #  Configuration du monorepo
 ```
 
 | Brique | Technologie | Port par défaut | Rôle |

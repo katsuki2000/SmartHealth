@@ -10,12 +10,9 @@ interface PrescriptionFormProps {
 
 interface Practitioner {
   id: string
-  userId: string
+  firstName: string
+  lastName: string
   specialty: string
-  user: {
-    firstName: string
-    lastName: string
-  }
 }
 
 interface Patient {
@@ -29,6 +26,25 @@ function getToken(): string {
   if (!token) throw new Error('Non authentifié')
   return token
 }
+
+const translateSpecialty = (s: string) => {
+  const map: Record<string, string> = {
+    'Diagnostician': 'Diagnosticien',
+    'Cardiologue': 'Cardiologue',
+    'Généraliste': 'Généraliste',
+    'Surgeon': 'Chirurgien',
+    'Nurse': 'Infirmier/ère',
+  };
+  return map[s] || s;
+};
+
+const getPractitionerName = (p: any) => {
+  if (p.name) return `Dr. ${p.name}`;
+  if (p.firstName && p.lastName && p.firstName !== 'À définir' && p.lastName !== 'À définir') {
+    return `Dr. ${p.firstName} ${p.lastName}`;
+  }
+  return `Médecin #${p.id.slice(0, 6)}`;
+};
 
 export default function PrescriptionForm({ onClose, onSuccess }: PrescriptionFormProps) {
   const [loading, setLoading] = useState(false)
@@ -175,7 +191,9 @@ export default function PrescriptionForm({ onClose, onSuccess }: PrescriptionFor
                 <label className="pf-label">Médecin Prescripteur</label>
                 <select name="practitionerId" className="pf-select" value={formData.practitionerId} onChange={handleChange} required>
                   {practitioners.map(p => (
-                    <option key={p.id} value={p.id}>Dr. {p.user?.lastName || p.id.slice(0,6)} ({p.specialty})</option>
+                    <option key={p.id} value={p.id}>
+                      {getPractitionerName(p)} ({translateSpecialty(p.specialty)})
+                    </option>
                   ))}
                 </select>
               </div>

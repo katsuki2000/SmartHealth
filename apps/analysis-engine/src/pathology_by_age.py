@@ -2,8 +2,6 @@
 ═══════════════════════════════════════════════════════════════════
 SmartHealth — PySpark Big Data Analysis Engine
 ═══════════════════════════════════════════════════════════════════
-Lit les 165K+ ressources FHIR depuis la table JSONB `fhir_resources`
-et effectue des analyses croisées épidémiologiques via Spark SQL.
 
 Analyses :
   1. Patients     — Démographie (âge, genre)
