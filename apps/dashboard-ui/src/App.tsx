@@ -1,6 +1,7 @@
 import React, { Suspense, lazy, useState, useEffect } from 'react'
 import { useAuth } from './components/AuthContext'
 import Login from './components/Login'
+import UserManagement from './components/UserManagement'
 import './App.css'
 
 // Chargement dynamique des Microfrontends (Module Federation)
@@ -166,14 +167,16 @@ export default function App() {
 
               </section>
 
-              <section className="card">
-                <div className="card-header"><h2 className="card-title">📉 Indicateurs de Santé</h2></div>
-                <ErrorBoundary name="AnalyticsWidget">
-                  <Suspense fallback={<MFELoader />}>
-                    <AnalyticsWidget />
-                  </Suspense>
-                </ErrorBoundary>
-              </section>
+              {user?.role?.toUpperCase() === 'ADMIN' && (
+                <section className="card">
+                  <div className="card-header"><h2 className="card-title">📉 Indicateurs de Santé</h2></div>
+                  <ErrorBoundary name="AnalyticsWidget">
+                    <Suspense fallback={<MFELoader />}>
+                      <AnalyticsWidget />
+                    </Suspense>
+                  </ErrorBoundary>
+                </section>
+              )}
 
               <section className="card">
                 <div className="card-header"><h2 className="card-title">🚨 Protocoles d'Urgence</h2></div>
@@ -259,9 +262,7 @@ export default function App() {
                 <div className="card-header">
                   <h2 className="card-title">⚙️ Administration Système</h2>
                 </div>
-                <p className="card-text">
-                  Bienvenue dans l'espace d'administration. (Panneau de gestion du personnel à venir).
-                </p>
+                <UserManagement />
               </section>
             </div>
           )}

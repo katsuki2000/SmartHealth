@@ -165,3 +165,37 @@
   from { opacity: 0; transform: translateY(20px) scale(0.95); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
+
+.pf-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  margin-top: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 100;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.pf-dropdown-item {
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+  color: #e2e8f0;
+}
+
+.pf-dropdown-item:hover {
+  background: rgba(59, 130, 246, 0.2);
+  color: #fff;
+}
+
+.pf-dropdown-item.selected {
+  background: rgba(59, 130, 246, 0.4);
+  color: #fff;
+  border-left: 3px solid #3b82f6;
+}

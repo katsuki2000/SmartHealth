@@ -23,15 +23,12 @@ model Patient {
   lastName       String
   birthDate      DateTime
   gender         String
-  
-  // Médecin traitant / Créateur (Optionnel pour supporter FHIR)
-  practitionerId String?
-  practitioner   Practitioner?  @relation(fields: [practitionerId], references: [id])
-
-  appointments   Appointment[]
-  prescriptions  Prescription[]
-  accessLogs     AccessLog[]
   createdAt      DateTime       @default(now())
+  practitionerId String?
+  accessLogs     AccessLog[]
+  appointments   Appointment[]
+  practitioner   Practitioner?  @relation(fields: [practitionerId], references: [id])
+  prescriptions  Prescription[]
 }
 
 model Practitioner {
@@ -41,16 +38,13 @@ model Practitioner {
   specialty     String
   email         String?        @unique
   phone         String?
-  
-  // Lien vers le compte de connexion
   userId        String?        @unique
-  user          User?          @relation(fields: [userId], references: [id])
-
-  patients      Patient[]
-  appointments  Appointment[]
-  prescriptions Prescription[]
-  accessLogs    AccessLog[]
   createdAt     DateTime       @default(now())
+  accessLogs    AccessLog[]
+  appointments  Appointment[]
+  patients      Patient[]
+  user          User?          @relation(fields: [userId], references: [id])
+  prescriptions Prescription[]
 }
 
 model Appointment {
@@ -60,44 +54,36 @@ model Appointment {
   reason         String?
   patientId      String
   practitionerId String
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
   patient        Patient        @relation(fields: [patientId], references: [id])
   practitioner   Practitioner   @relation(fields: [practitionerId], references: [id])
   prescriptions  Prescription[]
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
 }
 
 model Prescription {
   id             String       @id @default(uuid())
-  medications    String       
+  medications    String
   instructions   String?
   issuedAt       DateTime     @default(now())
-  
-  appointmentId  String?      
-  appointment    Appointment? @relation(fields: [appointmentId], references: [id])
-  
+  appointmentId  String?
   patientId      String
-  patient        Patient      @relation(fields: [patientId], references: [id])
-  
   practitionerId String
+  appointment    Appointment? @relation(fields: [appointmentId], references: [id])
+  patient        Patient      @relation(fields: [patientId], references: [id])
   practitioner   Practitioner @relation(fields: [practitionerId], references: [id])
 }
 
-// ─── Break-The-Glass Audit Logging ────────────────────────
 model AccessLog {
   id             String       @id @default(uuid())
   practitionerId String
   patientId      String
   reason         String
   accessedAt     DateTime     @default(now())
-
-  practitioner   Practitioner @relation(fields: [practitionerId], references: [id])
   patient        Patient      @relation(fields: [patientId], references: [id])
+  practitioner   Practitioner @relation(fields: [practitionerId], references: [id])
 }
 
-// ─── FHIR Native Storage ─────────────────────────────
-// Stores raw FHIR R4 resources (Synthea-compatible) as JSONB.
-// resourceType: "Patient", "Observation", "Encounter", etc.
 model FhirResource {
   id           String   @id @default(uuid())
   resourceType String
@@ -107,4 +93,21 @@ model FhirResource {
 
   @@index([resourceType])
   @@map("fhir_resources")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model AnalyticsSummary {
+  total_patients       Int
+  urgent_appointments  Int
+  total_practitioners  Int
+  average_age          Float
+  total_fhir_resources Int
+  total_conditions     Int
+  total_encounters     Int
+  total_observations   Int
+  top_pathology        String?
+  top_pathology_count  Int?
+  computed_at          DateTime @db.Timestamp(6)
+
+  @@ignore
 }
