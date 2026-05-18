@@ -142,7 +142,7 @@ export class PatientService {
   async emergencyAccess(patientId: string, userId: string, reason: string) {
     const practitioner = await this.prisma.practitioner.findUnique({ where: { userId } });
     if (!practitioner) {
-      throw new BadRequestException('Seul un médecin peut utiliser l\'accès d\'urgence');
+      throw new BadRequestException('Only a doctor can use emergency access');
     }
 
     const patient = await this.prisma.patient.findUnique({ where: { id: patientId } });

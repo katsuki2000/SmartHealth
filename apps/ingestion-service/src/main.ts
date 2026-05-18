@@ -35,7 +35,7 @@ async function bootstrap() {
   // Setup Swagger documentation
   const config = new DocumentBuilder()
     .setTitle('SmartHealth API')
-    .setDescription("Documentation interactive de l'API SmartHealth — Plateforme de santé interopérable FHIR R4")
+    .setDescription("Interactive OpenAPI documentation for the SmartHealth API — A high-performance, interoperable FHIR R4 clinical platform")
     .setVersion('1.0')
     .addBearerAuth()
     .build();
@@ -45,8 +45,8 @@ async function bootstrap() {
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
   
-  logger.log(`🚀 Application is running on: http://localhost:${port}`);
-  logger.log(`📚 API Documentation available at: http://localhost:${port}/api/docs`);
+  logger.log(`Application is running on: http://localhost:${port}`);
+  logger.log(`API Documentation available at: http://localhost:${port}/api/docs`);
 }
 
 bootstrap().catch((error) => {

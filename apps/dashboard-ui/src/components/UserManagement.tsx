@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './UserManagement.css';
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://localhost:8243/smarthealth/1.0.0';
+
 interface User {
   id: string;
   email: string;
@@ -42,7 +44,7 @@ export default function UserManagement() {
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem('smarthealth_token');
-      const res = await fetch('http://localhost:3000/auth/users', {
+      const res = await fetch(`${API_BASE}/auth/users`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error('Erreur lors de la récupération des utilisateurs');
@@ -70,7 +72,7 @@ export default function UserManagement() {
     setError('');
     try {
       const token = localStorage.getItem('smarthealth_token');
-      const res = await fetch('http://localhost:3000/auth/register', {
+      const res = await fetch(`${API_BASE}/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -131,7 +133,7 @@ export default function UserManagement() {
       if (editData.lastName !== (editingUser.practitioner?.lastName || '')) payload.lastName = editData.lastName;
       if (editData.specialty !== (editingUser.practitioner?.specialty || '')) payload.specialty = editData.specialty;
 
-      const res = await fetch(`http://localhost:3000/auth/users/${editingUser.id}`, {
+      const res = await fetch(`${API_BASE}/auth/users/${editingUser.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -159,7 +161,7 @@ export default function UserManagement() {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) return;
     try {
       const token = localStorage.getItem('smarthealth_token');
-      const res = await fetch(`http://localhost:3000/auth/users/${id}`, {
+      const res = await fetch(`${API_BASE}/auth/users/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });

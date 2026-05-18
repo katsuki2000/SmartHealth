@@ -11,27 +11,27 @@ import { CurrentUser } from '../auth/current-user.decorator';
 export class AppointmentController {
   constructor(private readonly appointmentService: AppointmentService) {}
 
-  @ApiOperation({ summary: 'Créer un rendez-vous' })
-  @ApiCreatedResponse({ description: 'Le rendez-vous a été créé avec succès.' })
+  @ApiOperation({ summary: 'Create an appointment' })
+  @ApiCreatedResponse({ description: 'Appointment created successfully.' })
   @Post()
   async create(@Body() createAppointmentDto: CreateAppointmentDto) {
     return this.appointmentService.create(createAppointmentDto);
   }
 
-  @ApiOperation({ summary: 'Lister les rendez-vous (filtré par médecin connecté)' })
-  @ApiOkResponse({ description: 'Liste des rendez-vous récupérée.' })
+  @ApiOperation({ summary: 'List appointments (filtered by connected doctor)' })
+  @ApiOkResponse({ description: 'List of appointments successfully retrieved.' })
   @Get()
   async findAll(@CurrentUser() user: any) {
     return this.appointmentService.findAll(user.userId, user.role);
   }
 
-  @ApiOperation({ summary: 'Récupérer un rendez-vous par son ID' })
+  @ApiOperation({ summary: 'Get an appointment by ID' })
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.appointmentService.findOne(id);
   }
 
-  @ApiOperation({ summary: 'Mettre à jour un rendez-vous' })
+  @ApiOperation({ summary: 'Update an appointment' })
   @Put(':id')
   async update(
     @Param('id') id: string,
@@ -40,7 +40,7 @@ export class AppointmentController {
     return this.appointmentService.update(id, updateAppointmentDto);
   }
 
-  @ApiOperation({ summary: 'Supprimer un rendez-vous' })
+  @ApiOperation({ summary: 'Delete an appointment' })
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return this.appointmentService.remove(id);

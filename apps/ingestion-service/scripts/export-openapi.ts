@@ -24,12 +24,12 @@ async function exportOpenApi() {
   }
 
   fs.writeFileSync(outputPath, JSON.stringify(document, null, 2));
-  console.log(`✅ OpenAPI spec exported to: ${outputPath}`);
+  console.log(`OpenAPI spec exported to: ${outputPath}`);
   
   await app.close();
 }
 
 exportOpenApi().catch((err) => {
-  console.error('❌ Failed to export OpenAPI spec:', err);
+  console.error('Failed to export OpenAPI spec:', err);
   process.exit(1);
 });

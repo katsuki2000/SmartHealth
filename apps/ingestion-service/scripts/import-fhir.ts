@@ -82,7 +82,7 @@ function extractResources(fileContent: any, fileName: string): any[] {
   if (fileContent.resourceType === 'Bundle') {
     if (!Array.isArray(fileContent.entry)) {
       console.log(
-        `   ⚠️  ${fileName} — Bundle sans entrées (entry vide), ignoré.`,
+        `   [Warning] ${fileName} — Bundle sans entrées (entry vide), ignoré.`,
       );
       stats.filesSkipped++;
       return [];
@@ -104,7 +104,7 @@ function extractResources(fileContent: any, fileName: string): any[] {
 
   // Cas 4 : Format non reconnu
   console.log(
-    `   ⏭  ${fileName} — Format JSON non reconnu comme FHIR, ignoré.`,
+    `   [Skip] ${fileName} — Format JSON non reconnu comme FHIR, ignoré.`,
   );
   stats.filesInvalid++;
   return [];
@@ -121,7 +121,7 @@ async function processFile(filePath: string, source: string) {
     try {
       parsed = JSON.parse(raw);
     } catch {
-      console.log(`   ❌ ${fileName} — JSON invalide, ignoré.`);
+      console.log(`   [Error] ${fileName} — JSON invalide, ignoré.`);
       stats.filesSkipped++;
       return;
     }
@@ -199,10 +199,10 @@ async function processFile(filePath: string, source: string) {
     const patMsg =
       patientCreated > 0 ? ` + ${patientCreated} patient(s)` : '';
     console.log(
-      `   ✅ ${fileName} — ${fhirInserted} ressources FHIR${patMsg}${dupMsg}`,
+      `   [Success] ${fileName} — ${fhirInserted} ressources FHIR${patMsg}${dupMsg}`,
     );
   } catch (error: any) {
-    console.error(`   ❌ ${fileName} — Erreur : ${error.message}`);
+    console.error(`   [Error] ${fileName} — Erreur : ${error.message}`);
     stats.errors++;
   }
 }
@@ -229,13 +229,13 @@ async function main() {
   const { dir: fhirDir, source } = parseArgs();
 
   console.log('══════════════════════════════════════════════════');
-  console.log('  📥 SmartHealth — Importeur Universel FHIR R4');
+  console.log('  SmartHealth — Importeur Universel FHIR R4');
   console.log('══════════════════════════════════════════════════');
-  console.log(`  📂 Dossier source : ${fhirDir}`);
-  console.log(`  🏷️  Source         : ${source}\n`);
+  console.log(`  Dossier source : ${fhirDir}`);
+  console.log(`  Source         : ${source}\n`);
 
   if (!fs.existsSync(fhirDir)) {
-    console.error(`❌ Le dossier "${fhirDir}" n'existe pas.`);
+    console.error(`[Error] Le dossier "${fhirDir}" n'existe pas.`);
     console.error(
       `   Usage : npx ts-node scripts/import-fhir.ts <chemin> [--source <nom>]`,
     );
@@ -250,12 +250,12 @@ async function main() {
 
   if (files.length === 0) {
     console.error(
-      `❌ Aucun fichier .json trouvé dans "${fhirDir}". Vérifiez le chemin.`,
+      `[Error] Aucun fichier .json trouvé dans "${fhirDir}". Vérifiez le chemin.`,
     );
     process.exit(1);
   }
 
-  console.log(`  📄 ${files.length} fichiers JSON trouvés.\n`);
+  console.log(`  ${files.length} fichiers JSON trouvés.\n`);
   console.log('─────────────────────────────────────────────────');
 
   const startTime = Date.now();
@@ -267,18 +267,18 @@ async function main() {
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
 
   console.log('\n══════════════════════════════════════════════════');
-  console.log('  📊 RÉSUMÉ DE L\'IMPORT FHIR R4');
+  console.log('\n  RÉSUMÉ DE L\'IMPORT FHIR R4');
   console.log('══════════════════════════════════════════════════');
-  console.log(`  🏷️  Source FHIR              : ${source}`);
-  console.log(`  ⏱️  Durée totale             : ${elapsed}s`);
-  console.log(`  📄 Fichiers traités          : ${stats.filesProcessed}`);
-  console.log(`  ⏭️  Fichiers ignorés          : ${stats.filesSkipped}`);
-  console.log(`  ⚠️  Fichiers invalides        : ${stats.filesInvalid}`);
-  console.log(`  💾 Ressources FHIR (JSONB)   : ${stats.fhirResourcesInserted}`);
-  console.log(`  🔁 Doublons ignorés          : ${stats.fhirResourcesDuplicated}`);
-  console.log(`  👤 Patients relationnels     : ${stats.relationalPatientsCreated}`);
-  console.log(`  ❌ Erreurs                   : ${stats.errors}`);
-  console.log('\n  📊 Répartition par type de ressource FHIR :');
+  console.log(`  Source FHIR              : ${source}`);
+  console.log(`  Durée totale             : ${elapsed}s`);
+  console.log(`  Fichiers traités          : ${stats.filesProcessed}`);
+  console.log(`  Fichiers ignorés          : ${stats.filesSkipped}`);
+  console.log(`  Fichiers invalides        : ${stats.filesInvalid}`);
+  console.log(`  Ressources FHIR (JSONB)   : ${stats.fhirResourcesInserted}`);
+  console.log(`  Doublons ignorés          : ${stats.fhirResourcesDuplicated}`);
+  console.log(`  Patients relationnels     : ${stats.relationalPatientsCreated}`);
+  console.log(`  Erreurs                   : ${stats.errors}`);
+  console.log('\n  Répartition par type de ressource FHIR :');
 
   const sorted = Object.entries(stats.resourceTypes).sort(
     (a, b) => b[1] - a[1],
@@ -292,7 +292,7 @@ async function main() {
 
 main()
   .catch((e) => {
-    console.error('❌ Erreur fatale :', e);
+    console.error('[Error] Erreur fatale :', e);
     process.exit(1);
   })
   .finally(async () => {

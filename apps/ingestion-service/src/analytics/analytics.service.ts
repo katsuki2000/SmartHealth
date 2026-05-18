@@ -3,12 +3,12 @@ import { PrismaService } from '../prisma/prisma.service';
 
 /**
  * AnalyticsService
- * 
- * Lit les données calculées par le moteur Big Data (PySpark)
- * depuis la table "AnalyticsSummary" en PostgreSQL.
- * 
- * Cette table est écrite par Spark via JDBC (mode overwrite),
- * indépendamment du schéma Prisma → on utilise $queryRawUnsafe.
+ *
+ * Reads pre-computed statistics from the "AnalyticsSummary" table (written by PySpark)
+ * and provides real-time metrics via direct PostgreSQL queries.
+ *
+ * - ADMIN: sees global platform-wide analytics
+ * - DOCTOR: sees only analytics scoped to their assigned patients
  */
 @Injectable()
 export class AnalyticsService {
@@ -23,7 +23,7 @@ export class AnalyticsService {
       );
 
       if (!rows || rows.length === 0) {
-        this.logger.warn('Table "AnalyticsSummary" est vide. Lancez le script PySpark.');
+        this.logger.warn('Table "AnalyticsSummary" is empty. Run the PySpark script.');
         return {
           totalPatients: 0,
           urgentAppointments: 0,
@@ -42,7 +42,7 @@ export class AnalyticsService {
       }
 
       const row = rows[0];
-      this.logger.log(`📊 Analytics chargées (calculées à ${row.computed_at})`);
+      this.logger.log(`Analytics loaded (computed at ${row.computed_at})`);
 
       return {
         totalPatients: Number(row.total_patients),
@@ -60,9 +60,8 @@ export class AnalyticsService {
         status: 'OK',
       };
     } catch (error: any) {
-      // La table n'existe pas encore (PySpark n'a jamais été lancé)
       if (error.code === '42P01') {
-        this.logger.warn('Table "AnalyticsSummary" introuvable. Lancez: python src/pathology_by_age.py');
+        this.logger.warn('Table "AnalyticsSummary" not found. Run: python src/pathology_by_age.py');
         return {
           totalPatients: 0,
           urgentAppointments: 0,
@@ -77,7 +76,7 @@ export class AnalyticsService {
           computedAt: null,
           source: 'analysis-engine (PySpark)',
           status: 'TABLE_NOT_FOUND',
-          message: 'Exécutez le script PySpark pour générer les statistiques.',
+          message: 'Run the PySpark script to generate analytics.',
         };
       }
       throw error;
@@ -85,19 +84,19 @@ export class AnalyticsService {
   }
 
   /**
-   * Données pour les graphiques — extraites directement depuis FHIR JSONB.
-   * Retourne les distributions pour les charts frontend.
+   * Chart data extracted from FHIR JSONB.
+   * Returns distributions for frontend charts.
    */
   async getChartsData() {
     try {
-      // 1. Répartition par genre
+      // Gender distribution
       const genderDist: any[] = await this.prisma.$queryRawUnsafe(`
         SELECT gender, COUNT(*)::int as count
         FROM "Patient"
         GROUP BY gender ORDER BY count DESC
       `);
 
-      // 2. Répartition par tranche d'âge
+      // Age group distribution
       const ageDist: any[] = await this.prisma.$queryRawUnsafe(`
         SELECT
           CASE
@@ -113,7 +112,7 @@ export class AnalyticsService {
         GROUP BY age_group ORDER BY age_group
       `);
 
-      // 3. Top 10 pathologies (depuis FHIR JSONB)
+      // Top 10 pathologies (from FHIR JSONB)
       const topConditions: any[] = await this.prisma.$queryRawUnsafe(`
         SELECT
           content->>'resourceType' as resource_type,
@@ -127,7 +126,7 @@ export class AnalyticsService {
         LIMIT 10
       `);
 
-      // 4. Répartition des types de ressources FHIR
+      // FHIR resource type distribution
       const resourceDist: any[] = await this.prisma.$queryRawUnsafe(`
         SELECT "resourceType" as resource_type, COUNT(*)::int as count
         FROM fhir_resources
@@ -136,7 +135,7 @@ export class AnalyticsService {
         LIMIT 10
       `);
 
-      // 5. Classes d'encounters
+      // Encounter class distribution
       const encounterClasses: any[] = await this.prisma.$queryRawUnsafe(`
         SELECT
           content->'class'->>'code' as class_code,
@@ -147,7 +146,7 @@ export class AnalyticsService {
         ORDER BY count DESC
       `);
 
-      // 6. Top 8 observations (constantes vitales)
+      // Top 8 observations (vital signs)
       const topObservations: any[] = await this.prisma.$queryRawUnsafe(`
         SELECT
           content->'code'->'coding'->0->>'display' as name,
@@ -184,11 +183,19 @@ export class AnalyticsService {
   }
 
   /**
-   * Statistiques en TEMPS RÉEL — requêtes directes sur les tables relationnelles.
-   * Contrairement à getAnalyticsSummary() qui lit le cache PySpark,
-   * cette méthode calcule les métriques à la volée.
+   * Real-time statistics via direct relational queries.
+   * Unlike getAnalyticsSummary() which reads PySpark cache,
+   * this computes metrics on the fly.
+   *
+   * Supports role-based scoping:
+   * - ADMIN: global stats across all patients
+   * - DOCTOR: stats scoped to their assigned patients only
    */
-  async getLiveStats() {
+  async getLiveStats(userId?: string, role?: string) {
+    if (role === 'DOCTOR' && userId) {
+      return this.getDoctorLiveStats(userId);
+    }
+
     const [totalPatients, urgentAppointments, totalPractitioners, avgAgeResult] =
       await Promise.all([
         this.prisma.patient.count(),
@@ -208,6 +215,40 @@ export class AnalyticsService {
       averageAge,
       computedAt: new Date().toISOString(),
       source: 'live (PostgreSQL direct)',
+      scope: 'global',
+      status: 'OK',
+    };
+  }
+
+  /**
+   * Doctor-scoped live statistics.
+   * Returns metrics only for patients assigned to this doctor.
+   */
+  private async getDoctorLiveStats(userId: string) {
+    const [myPatients, myAppointments, avgAgeResult] = await Promise.all([
+      this.prisma.patient.count({ where: { practitionerId: userId } }),
+      this.prisma.appointment.count({
+        where: {
+          practitionerId: userId,
+          status: 'EMERGENCY',
+        },
+      }),
+      this.prisma.$queryRawUnsafe(
+        `SELECT COALESCE(AVG(EXTRACT(YEAR FROM age(NOW(), "birthDate"))), 0) as avg_age
+         FROM "Patient" WHERE "practitionerId" = $1`,
+        userId,
+      ),
+    ]);
+
+    const averageAge = Math.round(Number((avgAgeResult as any[])[0]?.avg_age || 0));
+
+    return {
+      totalPatients: myPatients,
+      urgentAppointments: myAppointments,
+      averageAge,
+      computedAt: new Date().toISOString(),
+      source: 'live (PostgreSQL direct)',
+      scope: 'doctor',
       status: 'OK',
     };
   }

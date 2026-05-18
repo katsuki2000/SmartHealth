@@ -12,7 +12,7 @@ interface Patient {
   gender: string
 }
 
-const API_BASE = 'http://localhost:3000'
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://localhost:8243/smarthealth/1.0.0'
 
 function getToken(): string {
   const token = localStorage.getItem('smarthealth_token')

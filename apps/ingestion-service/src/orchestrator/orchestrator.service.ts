@@ -8,19 +8,20 @@ export class OrchestratorService {
 
   async onModuleInit() {
     try {
-      const connection = await Connection.connect({ address: 'localhost:7233' });
+      const temporalAddress = process.env.TEMPORAL_ADDRESS || 'localhost:7233';
+      const connection = await Connection.connect({ address: temporalAddress });
       this.client = new Client({ connection });
-      this.logger.log('✅ Connecté au serveur Temporal (Client)');
+      this.logger.log('Connected to Temporal server (Client)');
     } catch (error) {
-      this.logger.error('❌ Erreur de connexion à Temporal', error);
+      this.logger.error('Failed to connect to Temporal server', error);
     }
   }
 
   async startEmergencyWorkflow(input: any) {
-    this.logger.log(`🚀 Déclenchement du workflow d'urgence via API...`);
-    
+    this.logger.log('Starting emergency admission workflow...');
+
     if (!this.client) {
-      throw new Error('Le client Temporal n\'est pas initialisé.');
+      throw new Error('Temporal client is not initialized.');
     }
 
     try {
@@ -30,16 +31,12 @@ export class OrchestratorService {
         args: [input],
       });
 
-      this.logger.log(`✅ Workflow d'urgence démarré (ID: ${handle.workflowId})`);
+      this.logger.log(`Emergency workflow started (ID: ${handle.workflowId})`);
 
-      // Pour la démo, on attend le résultat directement.
-      // En production, on renverrait juste l'ID du workflow (202 Accepted)
-      // et le frontend ferait du polling ou utiliserait des WebSockets.
       const result = await handle.result();
-      
       return result;
     } catch (error: any) {
-      this.logger.error(`Erreur de démarrage du workflow : ${error.message}`);
+      this.logger.error(`Failed to start workflow: ${error.message}`);
       throw error;
     }
   }

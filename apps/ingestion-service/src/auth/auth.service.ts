@@ -13,16 +13,16 @@ export class AuthService {
   ) {}
 
   /**
-   * Crée un nouveau compte utilisateur.
-   * Seul un ADMIN connecté peut appeler cette méthode (vérifié par le controller).
+   * Creates a new user account.
+   * Only a connected ADMIN can call this method (enforced by the controller).
    */
   async register(data: RegisterDto) {
-    // Vérifier si l'email existe déjà
+    // Check if email already exists
     const existing = await this.prisma.user.findUnique({
       where: { email: data.email },
     });
     if (existing) {
-      throw new ConflictException(`Un compte avec l'email "${data.email}" existe déjà.`);
+      throw new ConflictException(`An account with email "${data.email}" already exists.`);
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -37,27 +37,26 @@ export class AuthService {
       },
     });
 
-    // Créer le profil Practitioner automatiquement si c'est un DOCTOR
+    // Create Practitioner profile automatically if role is DOCTOR
     if (userRole === 'DOCTOR') {
       await this.prisma.practitioner.create({
         data: {
           userId: user.id,
-          firstName: data.firstName || 'À définir',
-          lastName: data.lastName || 'À définir',
-          specialty: data.specialty || 'Généraliste',
+          firstName: data.firstName || 'To be defined',
+          lastName: data.lastName || 'To be defined',
+          specialty: data.specialty || 'General Practice',
           email: data.email,
         },
       });
     }
 
-    // Don't return the password in the response!
     const { password, ...result } = user;
     return result;
   }
 
   /**
-   * Liste tous les utilisateurs de la plateforme.
-   * Réservé à l'administration.
+   * Lists all users on the platform.
+   * Reserved for administration.
    */
   async getUsers() {
     const users = await this.prisma.user.findMany({
@@ -81,17 +80,16 @@ export class AuthService {
   }
 
   /**
-   * Supprime un utilisateur.
+   * Deletes a user.
    */
   async deleteUser(id: string) {
-    // Note : Prisma gère les relations, mais on doit faire attention aux cascade deletes si configuré.
     return this.prisma.user.delete({
       where: { id },
     });
   }
 
   /**
-   * Met à jour un utilisateur (rôle, email, et/ou infos praticien).
+   * Updates a user (role, email, and/or practitioner info).
    */
   async updateUser(id: string, data: {
     email?: string;
@@ -101,7 +99,7 @@ export class AuthService {
     lastName?: string;
     specialty?: string;
   }) {
-    // 1. Mettre à jour le User
+    // 1. Update the User
     const userUpdate: any = {};
     if (data.email) userUpdate.email = data.email;
     if (data.role) userUpdate.role = data.role;
@@ -115,7 +113,7 @@ export class AuthService {
       data: userUpdate,
     });
 
-    // 2. Mettre à jour le profil Practitioner s'il existe
+    // 2. Update the Practitioner profile if it exists
     if (data.firstName || data.lastName || data.specialty) {
       const existing = await this.prisma.practitioner.findUnique({
         where: { userId: id },
@@ -132,7 +130,7 @@ export class AuthService {
           },
         });
       } else if (user.role === 'DOCTOR') {
-        // Créer le profil praticien si le rôle vient de passer à DOCTOR
+        // Create practitioner profile if role was just changed to DOCTOR
         await this.prisma.practitioner.create({
           data: {
             userId: id,

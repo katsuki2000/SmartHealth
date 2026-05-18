@@ -5,34 +5,34 @@ import path from 'path';
 const execAsync = promisify(exec);
 
 export async function runPySparkAnalytics(): Promise<string> {
-  console.log(`📊 [Activity] Démarrage du script PySpark (Analytics)...`);
+  console.log(`[Activity] Starting PySpark analytics script...`);
   
-  // Chemin absolu vers le script PySpark.
-  // Depuis apps/orchestrator-worker/src/activities, on remonte jusqu'à la racine du monorepo
+  // Absolute path to the PySpark script.
+  // From apps/orchestrator-worker/src/activities, we go up to the monorepo root
   const scriptPath = path.resolve(__dirname, '../../../../apps/analysis-engine/src/pathology_by_age.py');
   
-  console.log(`   → Script path: ${scriptPath}`);
+  console.log(`   -> Script path: ${scriptPath}`);
 
   try {
-    // Exécution du script Python. On s'assure d'utiliser l'environnement virtuel s'il existe ou juste python.
-    // L'exécution peut prendre quelques dizaines de secondes car PySpark est lourd
-    // PYTHONIOENCODING=utf-8 est essentiel sur Windows pour que les emojis et caractères spéciaux de PySpark ne fassent pas crasher child_process.exec
+    // Execute the Python script. Uses the virtual environment if available, otherwise just python.
+    // Execution may take a few dozen seconds because PySpark is heavy.
+    // PYTHONIOENCODING=utf-8 is essential on Windows so special characters don't crash child_process.exec
     const { stdout, stderr } = await execAsync(`python "${scriptPath}"`, {
       env: { ...process.env, PYTHONIOENCODING: 'utf-8' },
     });
     
-    console.log(`✅ [Activity] Script PySpark terminé avec succès !`);
+    console.log(`[Activity] PySpark script completed successfully!`);
     if (stdout) {
       console.log(`\n--- PySpark Output ---\n${stdout.substring(0, 500)}...\n----------------------`);
     }
     
     if (stderr && !stderr.includes('WARN')) {
-      console.warn(`⚠️ [Activity] Avertissements (stderr):\n${stderr.substring(0, 300)}...`);
+      console.warn(`[Activity] Warnings (stderr):\n${stderr.substring(0, 300)}...`);
     }
     
     return 'Analytics completed successfully';
   } catch (error: any) {
-    console.error(`❌ [Activity] Erreur lors de l'exécution de PySpark:`);
+    console.error(`[Activity] Error during PySpark execution:`);
     console.error(error.message);
     throw new Error(`PySpark execution failed: ${error.message}`);
   }

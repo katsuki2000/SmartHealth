@@ -10,27 +10,27 @@ import { UpdatePractitionerDto } from './update-practitioner.dto';
 export class PractitionerController {
   constructor(private readonly practitionerService: PractitionerService) {}
 
-  @ApiOperation({ summary: 'Créer un praticien' })
-  @ApiCreatedResponse({ description: 'Le praticien a été créé avec succès.' })
+  @ApiOperation({ summary: 'Create a practitioner' })
+  @ApiCreatedResponse({ description: 'Practitioner created successfully.' })
   @Post()
   async create(@Body() createPractitionerDto: CreatePractitionerDto) {
     return this.practitionerService.create(createPractitionerDto);
   }
 
-  @ApiOperation({ summary: 'Lister tous les praticiens' })
-  @ApiOkResponse({ description: 'Liste des praticiens récupérée avec succès.' })
+  @ApiOperation({ summary: 'List all practitioners' })
+  @ApiOkResponse({ description: 'List of practitioners successfully retrieved.' })
   @Get()
   async findAll() {
     return this.practitionerService.findAll();
   }
 
-  @ApiOperation({ summary: 'Récupérer un praticien par son ID' })
+  @ApiOperation({ summary: 'Get a practitioner by ID' })
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.practitionerService.findOne(id);
   }
 
-  @ApiOperation({ summary: 'Mettre à jour un praticien' })
+  @ApiOperation({ summary: 'Update a practitioner' })
   @Put(':id')
   async update(
     @Param('id') id: string,
@@ -39,7 +39,7 @@ export class PractitionerController {
     return this.practitionerService.update(id, updatePractitionerDto);
   }
 
-  @ApiOperation({ summary: 'Supprimer un praticien' })
+  @ApiOperation({ summary: 'Delete a practitioner' })
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return this.practitionerService.remove(id);

@@ -1,6 +1,6 @@
 # SmartHealth — Plateforme de Santé Interopérable
 
-SmartHealth est un projet d'architecture orientée **microservices** conçu pour la **Gouvernance de Données de Santé** à grande échelle. Le système gère l'ingestion massive de données au format standard **FHIR R4**, l'analyse Big Data via **Apache Spark**, l'orchestration de workflows cliniques critiques via **Temporal.io**, et la sécurisation des accès via une **API Gateway WSO2**.
+SmartHealth est un projet d'architecture orientée **microservices** conçu pour la **Gouvernance de Données de Santé** à grande échelle. Le système gère l'ingestion massive de données au format standard **FHIR**, l'analyse Big Data via **Apache Spark**, l'orchestration de workflows cliniques critiques via **Temporal.io**, et la sécurisation des accès via une **API Gateway WSO2**.
 
 ---
 
@@ -15,7 +15,7 @@ SmartHealth est un projet d'architecture orientée **microservices** conçu pour
 - [Configuration des fichiers `.env`](#-configuration-des-fichiers-env)
 - [Initialisation de la base de données](#-initialisation-de-la-base-de-données)
 - [Démarrage des services](#-démarrage-des-services)
-- [Configuration de l'API Gateway WSO2 (Optionnel)](#-configuration-de-lapi-gateway-wso2-optionnel)
+- [Configuration de l'API Gateway WSO2](#-configuration-de-lapi-gateway-wso2)
 - [Résolution de problèmes](#-résolution-de-problèmes)
 
 ---
@@ -32,7 +32,7 @@ SmartHealth/
 │   ├── analysis-engine/      #  Moteur PySpark (Big Data Analytics)
 │   ├── dashboard-ui/         #  Shell React (Micro-Frontend Host)
 │   └── patients-mfe/         #  Micro-Frontend Patients (Module Federation)
-├── scripts/                  #  Scripts utilitaires (import Synthea, etc.)
+├── scripts/                  #  Scripts utilitaires d'importation FHIR
 ├── shared/                   #  Code partagé entre les apps
 ├── gateway-config/           #  Configuration WSO2 API Manager
 └── pnpm-workspace.yaml       #  Configuration du monorepo
@@ -42,7 +42,7 @@ SmartHealth/
 |--------|------------|----------------|------|
 | **Ingestion Service** | NestJS + Prisma + PostgreSQL | `3000` | API REST, ingestion FHIR, authentification JWT |
 | **Orchestrator Worker** | Temporal.io (TypeScript) | — | Workflows d'admission aux urgences, CronJobs |
-| **Analysis Engine** | PySpark + psycopg2 | — | Analyse Big Data sur 165K+ ressources FHIR JSONB |
+| **Analysis Engine** | PySpark + Spark JDBC | — | Analyse Big Data sur ressources FHIR JSONB |
 | **Dashboard UI** | React + Vite | `5000` | Shell principal du dashboard (Module Federation Host) |
 | **Patients MFE** | React + Vite | `5001` | Micro-Frontend exposant les composants patients |
 | **RabbitMQ** | AMQP | `5672` / `15672` | Bus de messages asynchrone inter-services |
@@ -54,10 +54,10 @@ SmartHealth/
 
 ## 🚀 Fonctionnalités Clés
 
-- **Ingestion Massive** — Pipeline capable d'absorber des milliers de patients générés (via *Synthea*) et de structurer des ressources cliniques massives en JSONB.
-- **Dashboard Analytique** — Visualisation des pathologies dominantes (SNOMED CT), répartition par âge/genre, et constantes vitales moyennes via des graphiques SVG 100% natifs.
+- **Ingestion Massive** — Pipeline capable d'absorber des milliers de ressources FHIR et de structurer des données cliniques massives en JSONB.
+- **Pathology Analytics** — Moteur Spark natif calculant la prévalence des pathologies par tranche d'âge et genre.
 - **Workflow d'Urgence** — Déclenchement "en 1 clic" d'une admission aux urgences via Temporal, 100% découplé et asynchrone.
-- **Gouvernance API** — Toutes les routes consommées par le Dashboard passent par WSO2, sécurisées par des tokens OAuth2.
+- **Gouvernance API** — Sécurisation des accès via WSO2 API Manager et OAuth2.
 
 ---
 
@@ -144,7 +144,7 @@ Vérification :
 temporal --version
 ```
 
-#### 8. WSO2 API Manager 4.x (Optionnel — pour la gouvernance API)
+#### 8. WSO2 API Manager 4.x (Requis — Gouvernance API)
 1. Téléchargez depuis [wso2.com](https://wso2.com/api-manager/)
 2. Dézippez dans un dossier (ex : `C:\wso2\wso2am-4.x.x`)
 3. **Nécessite Java 11 ou 17**
@@ -239,7 +239,7 @@ source ~/.bashrc
 temporal --version
 ```
 
-#### 8. WSO2 API Manager 4.x (Optionnel)
+#### 8. WSO2 API Manager 4.x (Requis)
 ```bash
 # Téléchargez et dézippez
 wget https://github.com/wso2/product-apim/releases/download/v4.3.0/wso2am-4.3.0.zip
@@ -461,7 +461,7 @@ pnpm exec prisma migrate deploy
 > ```
 > Cela ouvrira un navigateur sur `http://localhost:5555` pour visualiser vos tables.
 
-### Étape 3 — (Optionnel) Injecter les données de test (Seed)
+### Étape 3 — (Optionnel) Injecter les données initiales (Seed)
 
 ```bash
 cd apps/ingestion-service
@@ -556,26 +556,18 @@ Le dashboard sera accessible sur **[http://localhost:5000](http://localhost:5000
 
 ---
 
-### 7. 📊 Analyse Big Data PySpark (à la demande)
+### 7. 📊 Analyse Big Data Spark (à la demande)
 
-L'analyse Spark n'est pas un serveur permanent. Lancez-la manuellement quand vous voulez calculer les KPIs :
+L'analyse Spark calcule les statistiques de pathologies et met à jour le résumé global pour le dashboard :
 
 ```bash
 cd apps/analysis-engine
-
-# Activez d'abord le virtualenv si ce n'est pas fait
-# Windows :
-.\venv\Scripts\activate
-# Linux :
-source venv/bin/activate
-
-# Lancer l'analyse
 python src/pathology_by_age.py
 ```
 
 ---
 
-### 8. 🔐 WSO2 API Manager (Optionnel) — Terminal 6
+### 8. 🔐 WSO2 API Manager (Requis) — Terminal 6
 
 **Windows :**
 ```powershell
@@ -592,9 +584,9 @@ python src/pathology_by_age.py
 
 ---
 
-## 🔐 Configuration de l'API Gateway WSO2 (Optionnel)
+## 🔐 Configuration de l'API Gateway WSO2
 
-Si vous souhaitez activer la gouvernance API complète :
+La gouvernance API via WSO2 est **obligatoire**. Toutes les requêtes du frontend transitent par la Gateway :
 
 1. Connectez-vous au **Publisher** : [https://localhost:9443/publisher](https://localhost:9443/publisher)
    - Login par défaut : `admin` / `admin`

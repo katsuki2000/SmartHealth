@@ -33,12 +33,48 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       }
     } else if (exception instanceof Error) {
       message = exception.message;
-      // Log stack trace for debugging
       this.logger.error(
         `Unhandled Exception: ${exception.message}`,
         exception.stack,
         'GlobalExceptionFilter',
       );
+    }
+
+    // Log error for audit trail
+    this.logger.warn(
+      `[${request.method}] ${request.url} - Status: ${status} - ${message}`,
+      'GlobalExceptionFilter',
+    );
+
+    // If the request is for a FHIR endpoint, return a proper FHIR OperationOutcome resource
+    if (request.url.startsWith('/fhir') || request.url.startsWith('/api/v1/fhir')) {
+      let severity = 'error';
+      let issueCode = 'invalid';
+
+      if (status >= 500) {
+        severity = 'fatal';
+        issueCode = 'exception';
+      } else if (status === 401 || status === 403) {
+        severity = 'error';
+        issueCode = 'security';
+      } else if (status === 404) {
+        severity = 'error';
+        issueCode = 'not-found';
+      }
+
+      const operationOutcome = {
+        resourceType: 'OperationOutcome',
+        issue: [
+          {
+            severity,
+            code: issueCode,
+            diagnostics: message,
+          },
+        ],
+      };
+
+      response.status(status).json(operationOutcome);
+      return;
     }
 
     const errorResponse = {
@@ -49,12 +85,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       message,
       ...(details && { details }),
     };
-
-    // Log error for audit trail
-    this.logger.warn(
-      `[${request.method}] ${request.url} - Status: ${status} - ${message}`,
-      'GlobalExceptionFilter',
-    );
 
     response.status(status).json(errorResponse);
   }

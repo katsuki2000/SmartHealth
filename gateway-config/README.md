@@ -25,7 +25,7 @@ Nous recommandons de n'exposer que les ressources critiques consommées par le D
 Pour que le Dashboard React puisse communiquer avec la Gateway :
 1. Allez dans **API Configurations** -> **Runtime**.
 2. Activez **CORS Configuration**.
-3. Assurez-vous que l'origine `http://localhost:5000` est autorisée (ou `*` en développement).
+3. Assurez-vous que les origines `http://localhost:5000` et `http://localhost:5001` sont autorisées. **Ne pas utiliser `*`.**
 4. **Important :** Dans la section **Security**, assurez-vous que `OAuth2` est coché.
 
 ### 4. Déploiement & Publication

@@ -1,10 +1,9 @@
 /**
- * Client Temporal — SmartHealth
+ * Temporal Client — SmartHealth
  *
- * Script pour DÉCLENCHER manuellement un workflow d'admission d'urgence.
- * C'est l'équivalent d'un bouton "Admission d'Urgence" dans l'interface.
+ * Script to manually trigger an emergency admission workflow.
  *
- * Usage : pnpm run start:client
+ * Usage: pnpm run start:client
  */
 import { Client, Connection } from '@temporalio/client';
 import { emergencyAdmissionWorkflow } from './workflows/emergency-admission.workflow';
@@ -16,60 +15,38 @@ async function run() {
   const temporalAddress = process.env.TEMPORAL_ADDRESS || 'localhost:7233';
   const taskQueue = process.env.TEMPORAL_TASK_QUEUE || 'smarthealth-emergency';
 
-  console.log('══════════════════════════════════════════════════');
-  console.log('  🚨 SmartHealth — Déclenchement Workflow Urgence');
-  console.log('══════════════════════════════════════════════════\n');
-
-  // Connexion au serveur Temporal
   const connection = await Connection.connect({ address: temporalAddress });
   const client = new Client({ connection });
 
-  // Données du patient d'urgence (simulation)
   const patientData = {
     firstName: 'Rakoto',
     lastName: 'Jean-Baptiste',
     birthDate: '1985-03-15',
     gender: 'male',
-    reason: 'Accident de la route — Traumatisme crânien — Admission urgence',
+    reason: 'Road accident — Cranial trauma — Emergency admission',
   };
 
-  console.log(`📋 Patient : ${patientData.firstName} ${patientData.lastName}`);
-  console.log(`📝 Motif : ${patientData.reason}\n`);
+  console.log(`Patient: ${patientData.firstName} ${patientData.lastName}`);
+  console.log(`Reason: ${patientData.reason}\n`);
 
-  // Démarrer le workflow
   const handle = await client.workflow.start(emergencyAdmissionWorkflow, {
     taskQueue,
     workflowId: `emergency-${Date.now()}`,
     args: [patientData],
   });
 
-  console.log(`🚀 Workflow démarré ! ID: ${handle.workflowId}`);
-  console.log(`   → Suivi en temps réel : http://localhost:8233/namespaces/default/workflows/${handle.workflowId}\n`);
+  console.log(`Workflow started (ID: ${handle.workflowId})`);
 
-  // Attendre le résultat
-  console.log('⏳ En attente du résultat...\n');
   const result = await handle.result();
 
-  console.log('══════════════════════════════════════════════════');
-  console.log('  ✅ WORKFLOW TERMINÉ AVEC SUCCÈS !');
-  console.log('══════════════════════════════════════════════════');
-  console.log(`  Patient ID     : ${result.patientId}`);
-  console.log(`  Praticien ID   : ${result.practitionerId}`);
-  console.log(`  Rendez-vous ID : ${result.appointmentId}`);
-  console.log(`  Statut         : ${result.status}`);
-  console.log('══════════════════════════════════════════════════\n');
+  console.log(`\nWorkflow completed:`);
+  console.log(`  Patient ID      : ${result.patientId}`);
+  console.log(`  Practitioner ID : ${result.practitionerId}`);
+  console.log(`  Appointment ID  : ${result.appointmentId}`);
+  console.log(`  Status          : ${result.status}`);
 }
 
 run().catch((err) => {
-  console.error('❌ Erreur :', err.message);
-  if (err.cause) {
-    console.error('   📛 Cause :', err.cause.message || err.cause);
-  }
-  if (err.cause?.cause) {
-    console.error('   📛 Détail :', err.cause.cause.message || err.cause.cause);
-  }
-  // Afficher toute la stack pour debug
-  console.error('\n🔍 Stack complète :');
-  console.error(JSON.stringify(err, Object.getOwnPropertyNames(err), 2));
+  console.error('Error:', err.message);
   process.exit(1);
 });

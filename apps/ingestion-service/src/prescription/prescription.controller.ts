@@ -16,31 +16,30 @@ export class PrescriptionController {
 
   @EventPattern('appointment_created')
   async handleAppointmentCreated(@Payload() message: any) {
-    this.logger.log(`📥 KAFKA EVENT RECEIVED in Prescription Module! Appointment ID: ${message.id}`);
-    // Future expansion: Automatically draft a Blank Prescription here!
+    this.logger.log(`Appointment event received: ${message.id}`);
   }
 
-  @ApiOperation({ summary: 'Créer une ordonnance/prescription' })
-  @ApiCreatedResponse({ description: 'La prescription a été créée avec succès.' })
+  @ApiOperation({ summary: 'Create a prescription' })
+  @ApiCreatedResponse({ description: 'Prescription created successfully.' })
   @Post()
   async create(@Body() createPrescriptionDto: CreatePrescriptionDto) {
     return this.prescriptionService.create(createPrescriptionDto);
   }
 
-  @ApiOperation({ summary: 'Lister les prescriptions (filtré par médecin connecté)' })
+  @ApiOperation({ summary: 'List prescriptions (filtered by connected doctor)' })
   @ApiOkResponse({ description: 'Liste des prescriptions récupérée.' })
   @Get()
   async findAll(@CurrentUser() user: any) {
     return this.prescriptionService.findAll(user.userId, user.role);
   }
 
-  @ApiOperation({ summary: 'Récupérer une prescription par son ID' })
+  @ApiOperation({ summary: 'Get a prescription by ID' })
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.prescriptionService.findOne(id);
   }
 
-  @ApiOperation({ summary: 'Mettre à jour une prescription' })
+  @ApiOperation({ summary: 'Update a prescription' })
   @Put(':id')
   async update(
     @Param('id') id: string,
@@ -49,7 +48,7 @@ export class PrescriptionController {
     return this.prescriptionService.update(id, updatePrescriptionDto);
   }
 
-  @ApiOperation({ summary: 'Supprimer une prescription' })
+  @ApiOperation({ summary: 'Delete a prescription' })
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return this.prescriptionService.remove(id);

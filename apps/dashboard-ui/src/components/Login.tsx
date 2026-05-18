@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useAuth } from './AuthContext';
 import './Login.css';
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://localhost:8243/smarthealth/1.0.0';
+
 export default function Login() {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
@@ -16,7 +18,7 @@ export default function Login() {
     setError('');
 
     try {
-      const res = await fetch('http://localhost:3000/auth/login', {
+      const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),

@@ -67,6 +67,39 @@ export default function App() {
   const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false)
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null)
   const [theme, setTheme] = useState(() => localStorage.getItem('smarthealth_theme') || 'dark')
+  
+  const [stats, setStats] = useState({
+    totalPatients: 0,
+    urgentAppointments: 0,
+    totalPractitioners: 0,
+    averageAge: 0,
+    scope: 'global'
+  })
+
+  useEffect(() => {
+    if (!isAuthenticated) return
+    const token = localStorage.getItem('smarthealth_token')
+    const headers = token ? { Authorization: `Bearer ${token}` } : undefined
+
+    fetch('/api/v1/analytics/live', { headers })
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch live stats')
+        return res.json()
+      })
+      .then(data => {
+        if (data.status === 'OK') {
+          setStats({
+            totalPatients: data.totalPatients,
+            urgentAppointments: data.urgentAppointments,
+            totalPractitioners: data.totalPractitioners || 0,
+            averageAge: data.averageAge,
+            scope: data.scope || 'global'
+          })
+        }
+      })
+      .catch(err => console.error('Live stats error:', err))
+  }, [isAuthenticated])
+
   const now = new Date()
   const timeStr = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
   const dateStr = now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
@@ -184,23 +217,23 @@ export default function App() {
                   <div className="stats-grid">
                     <div className="stat-card">
                       <div className="stat-header"><Users size={16}/> Patients suivis</div>
-                      <div className="stat-value">684</div>
-                      <div className="stat-sub">Dossiers actifs</div>
+                      <div className="stat-value">{stats.totalPatients}</div>
+                      <div className="stat-sub">{stats.scope === 'doctor' ? 'Vos patients suivis' : 'Dossiers globaux actifs'}</div>
                     </div>
                     <div className="stat-card">
-                      <div className="stat-header"><Activity size={16}/> Diagnostics</div>
-                      <div className="stat-value">21 276</div>
-                      <div className="stat-sub">Ressources cliniques enregistrées</div>
+                      <div className="stat-header"><Activity size={16}/> Âge Moyen</div>
+                      <div className="stat-value">{stats.averageAge} ans</div>
+                      <div className="stat-sub">{stats.scope === 'doctor' ? 'Moyenne de vos patients' : 'Moyenne générale de la plateforme'}</div>
                     </div>
                     <div className="stat-card">
-                      <div className="stat-header"><CalendarDays size={16}/> Consultations</div>
-                      <div className="stat-value">42</div>
-                      <div className="stat-sub">Prévues aujourd'hui</div>
+                      <div className="stat-header"><AlertTriangle size={16}/> Urgences Critiques</div>
+                      <div className="stat-value">{stats.urgentAppointments}</div>
+                      <div className="stat-sub">{stats.scope === 'doctor' ? 'Vos cas urgents' : 'Parcours d\'urgence actifs'}</div>
                     </div>
                     <div className="stat-card">
-                      <div className="stat-header"><FileText size={16}/> Prescriptions</div>
-                      <div className="stat-value">128</div>
-                      <div className="stat-sub">Émises cette semaine</div>
+                      <div className="stat-header"><Users size={16}/> Praticiens Actifs</div>
+                      <div className="stat-value">{stats.scope === 'doctor' ? '1 (Vous)' : stats.totalPractitioners}</div>
+                      <div className="stat-sub">{stats.scope === 'doctor' ? 'Médecin connecté' : 'Médecins enregistrés'}</div>
                     </div>
                   </div>
 
