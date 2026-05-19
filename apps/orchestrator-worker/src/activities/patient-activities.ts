@@ -5,6 +5,9 @@
  * On failure, Temporal handles retries automatically.
  */
 import axios, { AxiosInstance } from 'axios';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 const API_URL = process.env.INGESTION_SERVICE_URL || 'http://localhost:3000';
 

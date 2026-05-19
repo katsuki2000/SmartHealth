@@ -20,4 +20,9 @@ export class AppController {
       message: 'SmartHealth API is running'
     };
   }
+
+  @Get('activities')
+  getRecentActivities() {
+    return this.appService.getRecentActivities();
+  }
 }

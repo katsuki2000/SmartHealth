@@ -41,14 +41,14 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
       });
 
       this.connection.on('connect', () => {
-        this.logger.log('✅ RabbitMQ connected successfully');
+        this.logger.log('RabbitMQ connected successfully');
         this.isReady = true;
       });
 
       this.connection.on('disconnect', (err: any) => {
         this.isReady = false;
         this.logger.warn(
-          `⚠️  RabbitMQ disconnected: ${err?.err?.message || 'unknown'}`,
+          `RabbitMQ disconnected: ${err?.err?.message || 'unknown'}`,
         );
       });
 
@@ -56,14 +56,14 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
         json: true,
         setup: async (ch: Channel) => {
           await ch.assertExchange(this.exchange, 'topic', { durable: true });
-          this.logger.log(`📌 Exchange "${this.exchange}" asserted`);
+          this.logger.log(`Exchange "${this.exchange}" asserted`);
         },
       });
 
       await this.channel.waitForConnect();
     } catch (error) {
       this.logger.warn(
-        `⚠️  RabbitMQ not available at startup (${error.message}). ` +
+        `RabbitMQ not available at startup (${error.message}). ` +
           'Events will be skipped until connection is restored.',
       );
     }
@@ -73,7 +73,7 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
     try {
       await this.channel?.close();
       await this.connection?.close();
-      this.logger.log('🔌 RabbitMQ connection closed');
+      this.logger.log('RabbitMQ connection closed');
     } catch (error) {
       this.logger.warn(`Could not close RabbitMQ connection: ${error.message}`);
     }
@@ -95,11 +95,11 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
         appId: 'smarthealth-ingestion-service',
       });
       this.logger.log(
-        `📤 Event published: [${this.exchange}] → "${routingKey}"`,
+        `Event published: [${this.exchange}] -> "${routingKey}"`,
       );
     } catch (error) {
       this.logger.error(
-        `❌ Failed to publish "${routingKey}": ${error.message}`,
+        `Failed to publish "${routingKey}": ${error.message}`,
       );
     }
   }

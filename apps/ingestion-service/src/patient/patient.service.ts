@@ -46,7 +46,7 @@ export class PatientService {
       },
     });
 
-    this.logger.log(`✅ FHIR Patient stored — internal id: ${resource.id}`);
+    this.logger.log(`FHIR Patient stored — internal id: ${resource.id}`);
 
     this.eventEmitter
       .emitFhirResourceCreated({ id: resource.id, resourceType: 'Patient' })

@@ -13,7 +13,7 @@ const logger = new Logger('Bootstrap');
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
-  // Enable CORS for frontend development
+  // Enable CORS for authorized frontend clients
   const corsOrigin = (process.env.CORS_ORIGIN || 'http://localhost:3000,http://localhost:4200,http://localhost:5173,http://localhost:5000,http://localhost:5001,http://localhost:5002').split(',');
   app.enableCors({
     origin: corsOrigin.map(o => o.trim()),

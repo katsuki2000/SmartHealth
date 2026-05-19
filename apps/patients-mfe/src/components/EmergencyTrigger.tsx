@@ -21,7 +21,7 @@ async function triggerEmergencyWorkflow(): Promise<WorkflowResult> {
 
   // On envoie simplement la demande à notre API NestJS, qui elle-même 
   // utilisera le client Temporal pour démarrer le workflow !
-  const res = await fetch(`${API_BASE}/api/v1/orchestrator/emergency`, {
+  const res = await fetch(`${API_BASE}/orchestrator/emergency`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

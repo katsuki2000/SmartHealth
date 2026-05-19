@@ -75,12 +75,47 @@ export default function App() {
     averageAge: 0,
     scope: 'global'
   })
+  const [activities, setActivities] = useState<any[]>([])
+
+  function formatRelativeTime(dateStr: string): string {
+    const date = new Date(dateStr)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMins / 60)
+    
+    if (diffMins < 1) return "À l'instant"
+    if (diffMins < 60) return `Il y a ${diffMins} min`
+    if (diffHours < 24) return `Il y a ${diffHours} ${diffHours === 1 ? 'heure' : 'heures'}`
+    
+    const diffDays = Math.floor(diffHours / 24)
+    if (diffDays === 1) return "Hier"
+    return `Il y a ${diffDays} jours`
+  }
+
+  function getActivityIcon(type: string) {
+    switch (type) {
+      case 'PATIENT':
+        return <Users size={14} className="text-accent" />
+      case 'PRESCRIPTION':
+        return <FileText size={14} className="text-success" />
+      case 'APPOINTMENT':
+        return <CalendarDays size={14} className="text-info" />
+      case 'ANALYTICS':
+        return <BarChart3 size={14} className="text-warning" />
+      case 'EMERGENCY':
+        return <AlertTriangle size={14} className="text-danger" />
+      default:
+        return <Clock size={14} className="text-muted" />
+    }
+  }
 
   useEffect(() => {
     if (!isAuthenticated) return
     const token = localStorage.getItem('smarthealth_token')
     const headers = token ? { Authorization: `Bearer ${token}` } : undefined
 
+    // Fetch stats
     fetch('/api/v1/analytics/live', { headers })
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch live stats')
@@ -98,6 +133,17 @@ export default function App() {
         }
       })
       .catch(err => console.error('Live stats error:', err))
+
+    // Fetch activities
+    fetch('/api/v1/activities', { headers })
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch activities')
+        return res.json()
+      })
+      .then(data => {
+        setActivities(data)
+      })
+      .catch(err => console.error('Activities error:', err))
   }, [isAuthenticated])
 
   const now = new Date()
@@ -313,41 +359,19 @@ export default function App() {
                       <h2 className="card-title"><Clock size={18} className="icon-mr"/> Dernières activités</h2>
                     </div>
                     <div className="activity-list-compact">
-                      <div className="activity-row">
-                        <Users size={14} className="text-accent" />
-                        <div className="act-details">
-                          <span className="act-title">Nouveau patient enregistré</span>
-                          <span className="act-time">Il y a 5 min</span>
-                        </div>
-                      </div>
-                      <div className="activity-row">
-                        <FileText size={14} className="text-success" />
-                        <div className="act-details">
-                          <span className="act-title">Prescription créée</span>
-                          <span className="act-time">Il y a 12 min</span>
-                        </div>
-                      </div>
-                      <div className="activity-row">
-                        <CalendarDays size={14} className="text-info" />
-                        <div className="act-details">
-                          <span className="act-title">Consultation planifiée</span>
-                          <span className="act-time">Il y a 1 heure</span>
-                        </div>
-                      </div>
-                      <div className="activity-row">
-                        <BarChart3 size={14} className="text-warning" />
-                        <div className="act-details">
-                          <span className="act-title">Analyse mise à jour</span>
-                          <span className="act-time">Ce matin</span>
-                        </div>
-                      </div>
-                      <div className="activity-row">
-                        <AlertTriangle size={14} className="text-danger" />
-                        <div className="act-details">
-                          <span className="act-title">Workflow d'urgence</span>
-                          <span className="act-time">Hier</span>
-                        </div>
-                      </div>
+                      {activities.length > 0 ? (
+                        activities.map((act, index) => (
+                          <div key={index} className="activity-row">
+                            {getActivityIcon(act.type)}
+                            <div className="act-details">
+                              <span className="act-title">{act.title}</span>
+                              <span className="act-time">{formatRelativeTime(act.time)}</span>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="no-activities" style={{ padding: '10px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>Aucune activité récente</div>
+                      )}
                     </div>
                   </section>
                 </div>

@@ -31,7 +31,7 @@
     },
     "/auth/register": {
       "post": {
-        "description": "Route protégée : nécessite un token JWT avec le rôle ADMIN. Utilisez le script \"pnpm run seed\" pour créer le premier administrateur.",
+        "description": "Protected route: requires a JWT token with ADMIN role. Use the \"pnpm run seed\" script to create the first administrator.",
         "operationId": "AuthController_register",
         "parameters": [],
         "requestBody": {
@@ -54,7 +54,7 @@
             "bearer": []
           }
         ],
-        "summary": "[ADMIN ONLY] Créer un compte Docteur ou Admin",
+        "summary": "[ADMIN ONLY] Create a Doctor or Admin account",
         "tags": [
           "auth"
         ]
@@ -79,7 +79,7 @@
             "description": ""
           }
         },
-        "summary": "Se connecter et obtenir un Token JWT",
+        "summary": "Log in and obtain a JWT Token",
         "tags": [
           "auth"
         ]
@@ -99,7 +99,7 @@
             "bearer": []
           }
         ],
-        "summary": "[ADMIN ONLY] Lister tous les utilisateurs",
+        "summary": "[ADMIN ONLY] List all users",
         "tags": [
           "auth"
         ]
@@ -128,7 +128,7 @@
             "bearer": []
           }
         ],
-        "summary": "[ADMIN ONLY] Modifier un utilisateur",
+        "summary": "[ADMIN ONLY] Update a user",
         "tags": [
           "auth"
         ]
@@ -155,7 +155,7 @@
             "bearer": []
           }
         ],
-        "summary": "[ADMIN ONLY] Supprimer un utilisateur",
+        "summary": "[ADMIN ONLY] Delete a user",
         "tags": [
           "auth"
         ]
@@ -185,7 +185,7 @@
             "bearer": []
           }
         ],
-        "summary": "Creer un patient (assigné automatiquement au médecin connecté si applicable)",
+        "summary": "Create a patient (automatically assigned to the connected practitioner if applicable)",
         "tags": [
           "patients"
         ]
@@ -203,7 +203,7 @@
             "bearer": []
           }
         ],
-        "summary": "Lister les patients (filtré pour le médecin connecté, sauf ADMIN)",
+        "summary": "List patients (filtered by connected practitioner, unless ADMIN)",
         "tags": [
           "patients"
         ]
@@ -232,7 +232,7 @@
             "bearer": []
           }
         ],
-        "summary": "Recuperer un patient par son ID",
+        "summary": "Retrieve a patient by ID",
         "tags": [
           "patients"
         ]
@@ -259,7 +259,7 @@
             "bearer": []
           }
         ],
-        "summary": "Mettre a jour un patient",
+        "summary": "Update a patient",
         "tags": [
           "patients"
         ]
@@ -286,7 +286,7 @@
             "bearer": []
           }
         ],
-        "summary": "Supprimer un patient",
+        "summary": "Delete a patient",
         "tags": [
           "patients"
         ]
@@ -294,7 +294,7 @@
     },
     "/patients/{id}/clinical-history": {
       "get": {
-        "description": "Récupère les ressources FHIR liées à un patient (Conditions, Observations, Encounters, Medications, Allergies) en établissant la correspondance entre la table relationnelle et le stockage JSONB FHIR R4.",
+        "description": "Retrieves FHIR resources linked to a patient (Conditions, Observations, Encounters, Medications, Allergies) by mapping between the relational table and FHIR R4 JSONB storage.",
         "operationId": "PatientController_getClinicalHistory",
         "parameters": [
           {
@@ -308,10 +308,10 @@
         ],
         "responses": {
           "200": {
-            "description": "Historique clinique récupéré"
+            "description": "Clinical history retrieved"
           },
           "404": {
-            "description": "Patient non trouvé"
+            "description": "Patient not found"
           }
         },
         "security": [
@@ -319,7 +319,7 @@
             "bearer": []
           }
         ],
-        "summary": "Historique clinique FHIR d'un patient",
+        "summary": "FHIR clinical history of a patient",
         "tags": [
           "patients"
         ]
@@ -327,7 +327,7 @@
     },
     "/patients/{id}/emergency-access": {
       "post": {
-        "description": "Permet à un médecin d'accéder à un dossier patient dont il n'est pas le médecin traitant. Nécessite une justification.",
+        "description": "Allows a practitioner to access a patient record outside their active caseload. Requires a justification.",
         "operationId": "PatientController_emergencyAccess",
         "parameters": [
           {
@@ -348,7 +348,7 @@
                 "properties": {
                   "reason": {
                     "type": "string",
-                    "example": "Urgence vitale suite à un accident de la route"
+                    "example": "Life-threatening emergency following a road accident"
                   }
                 },
                 "required": [
@@ -368,7 +368,7 @@
             "bearer": []
           }
         ],
-        "summary": "Break The Glass : Accès d'urgence à un patient hors de la file active",
+        "summary": "Break The Glass: Emergency access to a patient outside the active caseload",
         "tags": [
           "patients"
         ]
@@ -389,7 +389,7 @@
               "examples": {
                 "fhir_r4_patient": {
                   "summary": "FHIR R4 Patient",
-                  "description": "Le body EST la ressource FHIR R4 directement (hôpital, labo, appareil médical, etc.).",
+                  "description": "The body IS the FHIR R4 resource directly (hospital, lab, medical device, etc.).",
                   "value": {
                     "resourceType": "Patient",
                     "id": "synthea-abc123",
@@ -492,7 +492,7 @@
         },
         "responses": {
           "201": {
-            "description": "Le praticien a été créé avec succès."
+            "description": "Practitioner created successfully."
           }
         },
         "security": [
@@ -500,7 +500,7 @@
             "bearer": []
           }
         ],
-        "summary": "Créer un praticien",
+        "summary": "Create a practitioner",
         "tags": [
           "practitioners"
         ]
@@ -510,7 +510,7 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Liste des praticiens récupérée avec succès."
+            "description": "Practitioner list retrieved successfully."
           }
         },
         "security": [
@@ -518,7 +518,7 @@
             "bearer": []
           }
         ],
-        "summary": "Lister tous les praticiens",
+        "summary": "List all practitioners",
         "tags": [
           "practitioners"
         ]
@@ -547,7 +547,7 @@
             "bearer": []
           }
         ],
-        "summary": "Récupérer un praticien par son ID",
+        "summary": "Retrieve a practitioner by ID",
         "tags": [
           "practitioners"
         ]
@@ -584,7 +584,7 @@
             "bearer": []
           }
         ],
-        "summary": "Mettre à jour un praticien",
+        "summary": "Update a practitioner",
         "tags": [
           "practitioners"
         ]
@@ -611,7 +611,7 @@
             "bearer": []
           }
         ],
-        "summary": "Supprimer un praticien",
+        "summary": "Delete a practitioner",
         "tags": [
           "practitioners"
         ]
@@ -633,7 +633,7 @@
         },
         "responses": {
           "201": {
-            "description": "Le rendez-vous a été créé avec succès."
+            "description": "Appointment created successfully."
           }
         },
         "security": [
@@ -641,7 +641,7 @@
             "bearer": []
           }
         ],
-        "summary": "Créer un rendez-vous",
+        "summary": "Create an appointment",
         "tags": [
           "appointments"
         ]
@@ -651,7 +651,7 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Liste des rendez-vous récupérée."
+            "description": "Appointment list retrieved."
           }
         },
         "security": [
@@ -659,7 +659,7 @@
             "bearer": []
           }
         ],
-        "summary": "Lister les rendez-vous (filtré par médecin connecté)",
+        "summary": "List appointments (filtered by connected practitioner)",
         "tags": [
           "appointments"
         ]
@@ -688,7 +688,7 @@
             "bearer": []
           }
         ],
-        "summary": "Récupérer un rendez-vous par son ID",
+        "summary": "Retrieve an appointment by ID",
         "tags": [
           "appointments"
         ]
@@ -725,7 +725,7 @@
             "bearer": []
           }
         ],
-        "summary": "Mettre à jour un rendez-vous",
+        "summary": "Update an appointment",
         "tags": [
           "appointments"
         ]
@@ -752,7 +752,7 @@
             "bearer": []
           }
         ],
-        "summary": "Supprimer un rendez-vous",
+        "summary": "Delete an appointment",
         "tags": [
           "appointments"
         ]
@@ -774,7 +774,7 @@
         },
         "responses": {
           "201": {
-            "description": "La prescription a été créée avec succès."
+            "description": "Prescription created successfully."
           }
         },
         "security": [
@@ -782,7 +782,7 @@
             "bearer": []
           }
         ],
-        "summary": "Créer une ordonnance/prescription",
+        "summary": "Create a prescription",
         "tags": [
           "prescriptions"
         ]
@@ -792,7 +792,7 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Liste des prescriptions récupérée."
+            "description": "Prescription list retrieved."
           }
         },
         "security": [
@@ -800,7 +800,7 @@
             "bearer": []
           }
         ],
-        "summary": "Lister les prescriptions (filtré par médecin connecté)",
+        "summary": "List prescriptions (filtered by connected practitioner)",
         "tags": [
           "prescriptions"
         ]
@@ -829,7 +829,7 @@
             "bearer": []
           }
         ],
-        "summary": "Récupérer une prescription par son ID",
+        "summary": "Retrieve a prescription by ID",
         "tags": [
           "prescriptions"
         ]
@@ -866,7 +866,7 @@
             "bearer": []
           }
         ],
-        "summary": "Mettre à jour une prescription",
+        "summary": "Update a prescription",
         "tags": [
           "prescriptions"
         ]
@@ -893,7 +893,7 @@
             "bearer": []
           }
         ],
-        "summary": "Supprimer une prescription",
+        "summary": "Delete a prescription",
         "tags": [
           "prescriptions"
         ]
@@ -905,10 +905,10 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Statistiques analytiques issues du moteur PySpark."
+            "description": "Analytical statistics from the PySpark engine."
           }
         },
-        "summary": "Récupérer les statistiques calculées par PySpark",
+        "summary": "Retrieve statistics computed by PySpark",
         "tags": [
           "Analytics"
         ]
@@ -920,10 +920,10 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Distributions et top pathologies extraites du JSONB FHIR."
+            "description": "Distributions and top pathologies extracted from FHIR JSONB."
           }
         },
-        "summary": "Données pour les graphiques (FHIR JSONB)",
+        "summary": "Chart data (FHIR JSONB)",
         "tags": [
           "Analytics"
         ]
@@ -935,10 +935,10 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Statistiques calculées en direct depuis les tables relationnelles."
+            "description": "Live statistics computed directly from relational tables."
           }
         },
-        "summary": "Statistiques en temps réel (requêtes directes PostgreSQL)",
+        "summary": "Real-time statistics (direct PostgreSQL queries)",
         "tags": [
           "Analytics"
         ]
@@ -950,10 +950,10 @@
         "parameters": [],
         "responses": {
           "202": {
-            "description": "Workflow démarré avec succès."
+            "description": "Workflow started successfully."
           }
         },
-        "summary": "Déclencher le workflow d'admission d'urgence",
+        "summary": "Trigger the emergency admission workflow",
         "tags": [
           "Orchestrator"
         ]
@@ -962,7 +962,7 @@
   },
   "info": {
     "title": "SmartHealth API",
-    "description": "Documentation interactive de l API SmartHealth",
+    "description": "Interactive OpenAPI documentation for the SmartHealth API",
     "version": "1.0",
     "contact": {}
   },
@@ -991,7 +991,7 @@
           "role": {
             "type": "string",
             "example": "DOCTOR",
-            "description": "Rôle du nouveau compte (DOCTOR ou ADMIN)",
+            "description": "Role of the new account (DOCTOR or ADMIN)",
             "enum": [
               "DOCTOR",
               "ADMIN"

@@ -138,11 +138,11 @@ export default function AnalyticsWidget() {
     const headers = token ? { Authorization: `Bearer ${token}` } : undefined
 
     Promise.all([
-      fetch(`${API_BASE}/api/v1/analytics/summary`, { headers }).then(r => {
+      fetch(`${API_BASE}/analytics/summary`, { headers }).then(r => {
         if (!r.ok) throw new Error('Accès refusé ou service indisponible')
         return r.json()
       }),
-      fetch(`${API_BASE}/api/v1/analytics/charts`, { headers }).then(r => r.json()),
+      fetch(`${API_BASE}/analytics/charts`, { headers }).then(r => r.json()),
     ])
       .then(([sum, ch]) => {
         setSummary(sum)

@@ -71,21 +71,13 @@ export default defineConfig(async ({ mode }) => {
       port: 5000,
       cors: true,
       proxy: {
-        // Auth va directement au backend (pas besoin de token WSO2 pour se connecter)
-        '/api/v1/auth': {
+        // All application API routes → direct backend (NestJS JWT guards handle security)
+        // WSO2 provides governance at the gateway level for external consumers.
+        // In development, Vite proxies directly to the backend for simplicity.
+        '/api/v1': {
           target: 'http://localhost:3000',
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api\/v1/, ''),
-        },
-        // Toutes les autres requetes passent par WSO2 Gateway
-        '/api/v1': {
-          target: wso2Gateway,
-          changeOrigin: true,
-          secure: false,
-          rewrite: (path) => path.replace(/^\/api\/v1/, ''),
-          headers: {
-            Authorization: `Bearer ${wso2Token}`,
-          },
         },
       },
     },

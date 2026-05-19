@@ -3,7 +3,7 @@ import { OrchestratorService } from './orchestrator.service';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('Orchestrator')
-@Controller('api/v1/orchestrator')
+@Controller('orchestrator')
 export class OrchestratorController {
   constructor(private readonly orchestratorService: OrchestratorService) {}
 
