@@ -475,7 +475,7 @@ Si vous disposez de fichiers FHIR Bundle générés par [Synthea](https://github
 ```bash
 # Depuis la racine du projet
 cd apps/ingestion-service
-npx ts-node scripts/import-synthea.ts --dir /chemin/vers/vos/fichiers/synthea/fhir
+npx ts-node scripts/import-synthea.ts /home/anjara/datahealth/synthea_sample_data_fhir_r4_nov2021/fhir
 ```
 
 ---

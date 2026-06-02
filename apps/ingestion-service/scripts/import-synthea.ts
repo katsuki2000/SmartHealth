@@ -123,7 +123,7 @@ async function processBundle(filePath: string) {
 async function main() {
   const synthDir =
     process.argv[2] ||
-    'C:\\Users\\Mahalahatse\\Downloads\\synthea_sample_data_fhir_latest';
+    '//home//anjara//datahealth//synthea_sample_data_fhir_r4_nov2021//fhir';
 
   console.log('══════════════════════════════════════════════════');
   console.log('  📥 SmartHealth — Import Synthea FHIR R4');

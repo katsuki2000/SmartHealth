@@ -4,30 +4,40 @@ import { PatientService } from './patient.service';
 import { CreatePatientDto } from './create-patient.dto';
 import { NotFoundException } from '@nestjs/common';
 
+type MockPatientService = {
+  create: jest.Mock<Promise<any>, [CreatePatientDto, string, string]>;
+  findAll: jest.Mock<Promise<any[]>, [string, string]>;
+  findOne: jest.Mock<Promise<any>, [string]>;
+  update: jest.Mock<Promise<any>, [string, Partial<CreatePatientDto>]>;
+  remove: jest.Mock<Promise<any>, [string]>;
+};
+
 describe('PatientController', () => {
   let controller: PatientController;
-  let patientService: PatientService;
 
   const mockPatient = {
     id: '123',
     firstName: 'John',
     lastName: 'Doe',
-    email: 'john@example.com',
-    phoneNumber: '1234567890',
+    gender: 'male',
     birthDate: new Date('1990-01-01'),
-    address: '123 Main St',
-    city: 'New York',
-    state: 'NY',
-    zipCode: '10001',
-    country: 'USA',
+    practitionerId: 'practitioner-1',
   };
 
-  const mockPatientService = {
-    create: jest.fn(),
-    findAll: jest.fn(),
-    findOne: jest.fn(),
-    update: jest.fn(),
-    remove: jest.fn(),
+  const mockUser = { userId: 'user-123', role: 'ADMIN' };
+
+  const mockPatientService: MockPatientService = {
+    create: jest.fn() as jest.Mock<
+      Promise<any>,
+      [CreatePatientDto, string, string]
+    >,
+    findAll: jest.fn() as jest.Mock<Promise<any[]>, [string, string]>,
+    findOne: jest.fn() as jest.Mock<Promise<any>, [string]>,
+    update: jest.fn() as jest.Mock<
+      Promise<any>,
+      [string, Partial<CreatePatientDto>]
+    >,
+    remove: jest.fn() as jest.Mock<Promise<any>, [string]>,
   };
 
   beforeEach(async () => {
@@ -42,7 +52,6 @@ describe('PatientController', () => {
     }).compile();
 
     controller = module.get<PatientController>(PatientController);
-    patientService = module.get<PatientService>(PatientService);
 
     jest.clearAllMocks();
   });
@@ -52,21 +61,19 @@ describe('PatientController', () => {
       const createPatientDto: CreatePatientDto = {
         firstName: 'John',
         lastName: 'Doe',
-        email: 'john@example.com',
-        phoneNumber: '1234567890',
         birthDate: '1990-01-01',
-        address: '123 Main St',
-        city: 'New York',
-        state: 'NY',
-        zipCode: '10001',
-        country: 'USA',
+        gender: 'male',
       };
 
       mockPatientService.create.mockResolvedValue(mockPatient);
 
-      const result = await controller.create(createPatientDto);
+      const result = await controller.create(createPatientDto, mockUser);
 
-      expect(patientService.create).toHaveBeenCalledWith(createPatientDto);
+      expect(mockPatientService.create).toHaveBeenCalledWith(
+        createPatientDto,
+        mockUser.userId,
+        mockUser.role,
+      );
       expect(result).toEqual(mockPatient);
     });
   });
@@ -76,9 +83,12 @@ describe('PatientController', () => {
       const patients = [mockPatient, { ...mockPatient, id: '456' }];
       mockPatientService.findAll.mockResolvedValue(patients);
 
-      const result = await controller.findAll();
+      const result = await controller.findAll(mockUser);
 
-      expect(patientService.findAll).toHaveBeenCalled();
+      expect(mockPatientService.findAll).toHaveBeenCalledWith(
+        mockUser.userId,
+        mockUser.role,
+      );
       expect(result).toEqual(patients);
     });
   });
@@ -89,7 +99,7 @@ describe('PatientController', () => {
 
       const result = await controller.findOne('123');
 
-      expect(patientService.findOne).toHaveBeenCalledWith('123');
+      expect(mockPatientService.findOne).toHaveBeenCalledWith('123');
       expect(result).toEqual(mockPatient);
     });
 
@@ -115,7 +125,10 @@ describe('PatientController', () => {
 
       const result = await controller.update('123', updatePatientDto);
 
-      expect(patientService.update).toHaveBeenCalledWith('123', updatePatientDto);
+      expect(mockPatientService.update).toHaveBeenCalledWith(
+        '123',
+        updatePatientDto,
+      );
       expect(result).toEqual(updatedPatient);
     });
 
@@ -136,7 +149,7 @@ describe('PatientController', () => {
 
       const result = await controller.remove('123');
 
-      expect(patientService.remove).toHaveBeenCalledWith('123');
+      expect(mockPatientService.remove).toHaveBeenCalledWith('123');
       expect(result).toEqual(mockPatient);
     });
 

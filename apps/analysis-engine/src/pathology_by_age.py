@@ -18,7 +18,10 @@ import os
 import sys
 from dotenv import load_dotenv
 
-load_dotenv()
+dotenv_loaded = load_dotenv()
+if not dotenv_loaded:
+    print("⚠️  Avertissement : aucun fichier .env trouvé dans apps/analysis-engine.")
+    print("   Copiez .env.example en .env et configurez DB_USER/DB_PASSWORD.")
 
 # Fix PySpark Windows — Hadoop winutils
 HADOOP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "hadoop"))
@@ -47,7 +50,14 @@ DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = os.getenv("DB_PORT", "5432")
 DB_NAME = os.getenv("DB_NAME", "health_db")
 DB_USER = os.getenv("DB_USER", "postgres")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "admin")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+
+if not DB_PASSWORD:
+    raise RuntimeError(
+        "La variable DB_PASSWORD n'est pas définie. "
+        "Copiez apps/analysis-engine/.env.example en apps/analysis-engine/.env "
+        "et définissez DB_PASSWORD."
+    )
 
 JDBC_URL = f"jdbc:postgresql://{DB_HOST}:{DB_PORT}/{DB_NAME}"
 POSTGRES_DRIVER = "org.postgresql.Driver"
@@ -60,13 +70,20 @@ def create_spark_session() -> SparkSession:
     print("     Powered by PySpark + FHIR JSONB")
     print("══════════════════════════════════════════════════\n")
 
+    tmp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'tmp', 'spark'))
+    os.makedirs(tmp_dir, exist_ok=True)
+    os.environ['TMPDIR'] = tmp_dir
+    os.environ['SPARK_LOCAL_DIRS'] = tmp_dir
+    os.environ['SPARK_LOCAL_IP'] = '127.0.0.1'
+
     spark = (
         SparkSession.builder
         .appName("SmartHealth-BigData-Analytics")
         .master("local[*]")
         .config("spark.jars.packages", "org.postgresql:postgresql:42.7.5")
-        .config("spark.driver.extraJavaOptions", "-Duser.timezone=UTC")
+        .config("spark.driver.extraJavaOptions", f"-Duser.timezone=UTC -Djava.io.tmpdir={tmp_dir}")
         .config("spark.sql.session.timeZone", "UTC")
+        .config("spark.local.dir", tmp_dir)
         .config("spark.driver.memory", "2g")
         .getOrCreate()
     )
