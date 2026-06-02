@@ -12,7 +12,7 @@ interface Patient {
   gender: string
 }
 
-const API_BASE = 'http://localhost:3000'
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://localhost:8243/smarthealth/1.0.0'
 
 function getToken(): string {
   const token = localStorage.getItem('smarthealth_token')
@@ -39,7 +39,7 @@ function calcAge(birthDate: string): number {
   return age
 }
 
-export default function PatientList() {
+export default function PatientList({ onSelectPatient }: { onSelectPatient?: (id: string) => void }) {
   const [patients, setPatients] = useState<Patient[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -99,15 +99,14 @@ export default function PatientList() {
     <div className="pl-container">
       <div className="pl-header">
         <div className="pl-header-left">
-          <h2 className="pl-title">👥 Gestion de la File Active</h2>
-          <span className="pl-badge">{patients.length} Dossiers</span>
+          <span className="pl-badge">{patients.length} dossiers</span>
         </div>
         <div className="pl-header-actions">
           <button className="pl-btn-add" onClick={() => setIsPrescriptionModalOpen(true)} style={{ color: '#10b981', borderColor: 'rgba(16, 185, 129, 0.3)', background: 'rgba(16, 185, 129, 0.1)' }}>
             📝 Prescription
           </button>
           <button className="pl-btn-add" onClick={() => setIsApptModalOpen(true)} style={{ color: '#f59e0b', borderColor: 'rgba(245, 158, 11, 0.3)', background: 'rgba(245, 158, 11, 0.1)' }}>
-            📅 Planifier Acte
+            📅 Planifier RDV
           </button>
           <button className="pl-btn-add" onClick={() => { setEditingPatient(null); setIsModalOpen(true) }}>
             + Admission Patient
@@ -120,21 +119,21 @@ export default function PatientList() {
         <div className="pl-grid">
           {patients.map(p => (
             <div key={p.id} className="pl-card">
-              <div className="pl-card-avatar">
+              <div className="pl-card-avatar" style={{ cursor: onSelectPatient ? 'pointer' : 'default' }} onClick={() => onSelectPatient?.(p.id)}>
                 {p.firstName?.[0]}{p.lastName?.[0]}
               </div>
               <div className="pl-card-info">
-                <div className="pl-card-name">{p.firstName} {p.lastName}</div>
+                <div className="pl-card-name" style={{ cursor: onSelectPatient ? 'pointer' : 'default' }} onClick={() => onSelectPatient?.(p.id)}>{p.firstName} {p.lastName}</div>
                 <div className="pl-card-meta">
                   <span className="pl-tag">{p.gender === 'male' ? '♂ Homme' : '♀ Femme'}</span>
                   <span className="pl-tag">🎂 {calcAge(p.birthDate)} ans</span>
                 </div>
               </div>
               <div className="pl-card-actions">
+                {onSelectPatient && <button className="pl-action-btn" onClick={() => onSelectPatient(p.id)} title="Consulter le dossier">📄</button>}
                 <button className="pl-action-btn pl-edit" onClick={() => openEdit(p)} title="Modifier">✏️</button>
                 <button className="pl-action-btn pl-delete" onClick={() => deletePatient(p.id, `${p.firstName} ${p.lastName}`)} title="Supprimer">🗑️</button>
               </div>
-              <div className="pl-card-id">#{p.id.slice(0, 8)}</div>
             </div>
           ))}
         </div>

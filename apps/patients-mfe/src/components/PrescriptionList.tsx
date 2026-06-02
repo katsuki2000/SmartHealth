@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import PrescriptionForm from './PrescriptionForm'
 import './PatientList.css'
 
-const API_BASE = 'http://localhost:3000'
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://localhost:8243/smarthealth/1.0.0'
 
 interface Prescription {
   id: string
@@ -72,8 +72,7 @@ export default function PrescriptionList() {
     <div className="pl-container">
       <div className="pl-header">
         <div className="pl-header-left">
-          <h2 className="pl-title">💊 Historique des Prescriptions</h2>
-          <span className="pl-badge">{prescriptions.length} Ordonnances</span>
+          <span className="pl-badge">{prescriptions.length} ordonnances</span>
         </div>
         <div className="pl-header-actions">
           <button className="pl-btn-add" onClick={() => setIsFormOpen(true)} style={{ color: '#10b981', borderColor: 'rgba(16, 185, 129, 0.3)', background: 'rgba(16, 185, 129, 0.1)' }}>

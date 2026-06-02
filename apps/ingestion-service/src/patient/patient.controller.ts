@@ -47,7 +47,7 @@ export class FhirPatientController {
     examples: {
       fhir_r4_patient: {
         summary: 'FHIR R4 Patient',
-        description: 'Le body EST la ressource FHIR R4 directement (hôpital, labo, appareil médical, etc.).',
+        description: 'The request body is directly the FHIR R4 Patient resource (from hospital, lab, device, etc.).',
         value: {
           resourceType: 'Patient',
           id: 'synthea-abc123',
@@ -94,7 +94,7 @@ export class FhirPatientController {
 export class PatientController {
   constructor(private readonly patientService: PatientService) {}
 
-  @ApiOperation({ summary: 'Creer un patient (assigné automatiquement au médecin connecté si applicable)' })
+  @ApiOperation({ summary: 'Create a patient (auto-assigned to the connected doctor if applicable)' })
   @Post()
   async create(
     @Body() createPatientDto: CreatePatientDto,
@@ -103,19 +103,19 @@ export class PatientController {
     return this.patientService.create(createPatientDto, user.userId, user.role);
   }
 
-  @ApiOperation({ summary: 'Lister les patients (filtré pour le médecin connecté, sauf ADMIN)' })
+  @ApiOperation({ summary: 'List patients (filtered for the connected doctor, except ADMIN)' })
   @Get()
   async findAll(@CurrentUser() user: any) {
     return this.patientService.findAll(user.userId, user.role);
   }
 
-  @ApiOperation({ summary: 'Recuperer un patient par son ID' })
+  @ApiOperation({ summary: 'Retrieve a patient by ID' })
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.patientService.findOne(id);
   }
 
-  @ApiOperation({ summary: 'Mettre a jour un patient' })
+  @ApiOperation({ summary: 'Update a patient' })
   @Put(':id')
   async update(
     @Param('id') id: string,
@@ -124,21 +124,34 @@ export class PatientController {
     return this.patientService.update(id, updatePatientDto);
   }
 
-  @ApiOperation({ summary: 'Supprimer un patient' })
+  @ApiOperation({ summary: 'Delete a patient' })
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return this.patientService.remove(id);
   }
 
+  @ApiOperation({
+    summary: 'Retrieve FHIR clinical history for a patient',
+    description:
+      'Retrieves all FHIR resources (Conditions, Observations, Encounters, MedicationRequests, AllergyIntolerances) ' +
+      'associated with a patient by mapping relational data to FHIR R4 JSONB records.',
+  })
+  @ApiResponse({ status: 200, description: 'Clinical history successfully retrieved' })
+  @ApiResponse({ status: 404, description: 'Patient not found' })
+  @Get(':id/clinical-history')
+  async getClinicalHistory(@Param('id') id: string) {
+    return this.patientService.getClinicalHistory(id);
+  }
+
   @ApiOperation({ 
-    summary: 'Break The Glass : Accès d\'urgence à un patient hors de la file active',
-    description: 'Permet à un médecin d\'accéder à un dossier patient dont il n\'est pas le médecin traitant. Nécessite une justification.' 
+    summary: 'Break The Glass: Emergency access to a patient outside the active roster',
+    description: 'Allows a doctor to access a patient record for which they are not the attending physician. Requires a justification.' 
   })
   @ApiBody({
     schema: {
       type: 'object',
       properties: {
-        reason: { type: 'string', example: 'Urgence vitale suite à un accident de la route' }
+        reason: { type: 'string', example: 'Vital emergency following road accident' }
       },
       required: ['reason']
     }
@@ -150,7 +163,7 @@ export class PatientController {
     @CurrentUser() user: any,
   ) {
     if (!reason) {
-      throw new BadRequestException('La justification (reason) est obligatoire');
+      throw new BadRequestException('Emergency justification (reason) is required');
     }
     return this.patientService.emergencyAccess(patientId, user.userId, reason);
   }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import './AnalyticsWidget.css'
 
-const API_BASE = import.meta.env.VITE_API_BASE ?? ''
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://localhost:8243/smarthealth/1.0.0'
 
 interface AnalyticsData {
   totalPatients: number
@@ -134,9 +134,15 @@ export default function AnalyticsWidget() {
   const [activeTab, setActiveTab] = useState<'overview' | 'conditions' | 'encounters' | 'vitals'>('overview')
 
   useEffect(() => {
+    const token = localStorage.getItem('smarthealth_token')
+    const headers = token ? { Authorization: `Bearer ${token}` } : undefined
+
     Promise.all([
-      fetch(`${API_BASE}/api/v1/analytics/summary`).then(r => r.json()),
-      fetch(`${API_BASE}/api/v1/analytics/charts`).then(r => r.json()),
+      fetch(`${API_BASE}/analytics/summary`, { headers }).then(r => {
+        if (!r.ok) throw new Error('Accès refusé ou service indisponible')
+        return r.json()
+      }),
+      fetch(`${API_BASE}/analytics/charts`, { headers }).then(r => r.json()),
     ])
       .then(([sum, ch]) => {
         setSummary(sum)

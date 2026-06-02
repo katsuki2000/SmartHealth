@@ -1,0 +1,1265 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "AppController_getHello",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "AppController_health",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "description": "Protected route: requires a JWT token with ADMIN role. Use the \"pnpm run seed\" script to create the first administrator.",
+        "operationId": "AuthController_register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "[ADMIN ONLY] Create a Doctor or Admin account",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Log in and obtain a JWT Token",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/users": {
+      "get": {
+        "operationId": "AuthController_getUsers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "[ADMIN ONLY] List all users",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/users/{id}": {
+      "patch": {
+        "operationId": "AuthController_updateUser",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "[ADMIN ONLY] Update a user",
+        "tags": [
+          "auth"
+        ]
+      },
+      "delete": {
+        "operationId": "AuthController_deleteUser",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "[ADMIN ONLY] Delete a user",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/patients": {
+      "post": {
+        "operationId": "PatientController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePatientDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a patient (automatically assigned to the connected practitioner if applicable)",
+        "tags": [
+          "patients"
+        ]
+      },
+      "get": {
+        "operationId": "PatientController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List patients (filtered by connected practitioner, unless ADMIN)",
+        "tags": [
+          "patients"
+        ]
+      }
+    },
+    "/patients/{id}": {
+      "get": {
+        "operationId": "PatientController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Retrieve a patient by ID",
+        "tags": [
+          "patients"
+        ]
+      },
+      "put": {
+        "operationId": "PatientController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a patient",
+        "tags": [
+          "patients"
+        ]
+      },
+      "delete": {
+        "operationId": "PatientController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a patient",
+        "tags": [
+          "patients"
+        ]
+      }
+    },
+    "/patients/{id}/clinical-history": {
+      "get": {
+        "description": "Retrieves FHIR resources linked to a patient (Conditions, Observations, Encounters, Medications, Allergies) by mapping between the relational table and FHIR R4 JSONB storage.",
+        "operationId": "PatientController_getClinicalHistory",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Clinical history retrieved"
+          },
+          "404": {
+            "description": "Patient not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "FHIR clinical history of a patient",
+        "tags": [
+          "patients"
+        ]
+      }
+    },
+    "/patients/{id}/emergency-access": {
+      "post": {
+        "description": "Allows a practitioner to access a patient record outside their active caseload. Requires a justification.",
+        "operationId": "PatientController_emergencyAccess",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "example": "Life-threatening emergency following a road accident"
+                  }
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Break The Glass: Emergency access to a patient outside the active caseload",
+        "tags": [
+          "patients"
+        ]
+      }
+    },
+    "/fhir/Patient": {
+      "post": {
+        "description": "Accepts any valid FHIR R4 Patient JSON directly (no wrapper). Stores it in the FhirResource JSONB table and publishes a \"fhir.patient.created\" event on RabbitMQ.",
+        "operationId": "FhirPatientController_createFhirPatient",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FhirPatientDto"
+              },
+              "examples": {
+                "fhir_r4_patient": {
+                  "summary": "FHIR R4 Patient",
+                  "description": "The body IS the FHIR R4 resource directly (hospital, lab, medical device, etc.).",
+                  "value": {
+                    "resourceType": "Patient",
+                    "id": "synthea-abc123",
+                    "name": [
+                      {
+                        "family": "Rakoto",
+                        "given": [
+                          "Jean"
+                        ]
+                      }
+                    ],
+                    "gender": "male",
+                    "birthDate": "1990-01-01",
+                    "address": [
+                      {
+                        "use": "home",
+                        "city": "Antananarivo",
+                        "country": "MG"
+                      }
+                    ],
+                    "telecom": [
+                      {
+                        "system": "phone",
+                        "value": "+261 20 22 000 00"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "FHIR Patient stored + event emitted"
+          },
+          "400": {
+            "description": "Invalid resourceType"
+          }
+        },
+        "summary": "Ingest a FHIR R4 Patient resource",
+        "tags": [
+          "FHIR Resources"
+        ]
+      },
+      "get": {
+        "operationId": "FhirPatientController_findAllFhirPatients",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of FHIR Patients"
+          }
+        },
+        "summary": "List all FHIR Patient resources (JSONB)",
+        "tags": [
+          "FHIR Resources"
+        ]
+      }
+    },
+    "/fhir/Patient/{id}": {
+      "get": {
+        "operationId": "FhirPatientController_findFhirPatient",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "FHIR Patient found"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "summary": "Get a FHIR Patient by internal ID",
+        "tags": [
+          "FHIR Resources"
+        ]
+      }
+    },
+    "/practitioners": {
+      "post": {
+        "operationId": "PractitionerController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePractitionerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Practitioner created successfully."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a practitioner",
+        "tags": [
+          "practitioners"
+        ]
+      },
+      "get": {
+        "operationId": "PractitionerController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Practitioner list retrieved successfully."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List all practitioners",
+        "tags": [
+          "practitioners"
+        ]
+      }
+    },
+    "/practitioners/{id}": {
+      "get": {
+        "operationId": "PractitionerController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Retrieve a practitioner by ID",
+        "tags": [
+          "practitioners"
+        ]
+      },
+      "put": {
+        "operationId": "PractitionerController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePractitionerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a practitioner",
+        "tags": [
+          "practitioners"
+        ]
+      },
+      "delete": {
+        "operationId": "PractitionerController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a practitioner",
+        "tags": [
+          "practitioners"
+        ]
+      }
+    },
+    "/appointments": {
+      "post": {
+        "operationId": "AppointmentController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAppointmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Appointment created successfully."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create an appointment",
+        "tags": [
+          "appointments"
+        ]
+      },
+      "get": {
+        "operationId": "AppointmentController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Appointment list retrieved."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List appointments (filtered by connected practitioner)",
+        "tags": [
+          "appointments"
+        ]
+      }
+    },
+    "/appointments/{id}": {
+      "get": {
+        "operationId": "AppointmentController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Retrieve an appointment by ID",
+        "tags": [
+          "appointments"
+        ]
+      },
+      "put": {
+        "operationId": "AppointmentController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAppointmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update an appointment",
+        "tags": [
+          "appointments"
+        ]
+      },
+      "delete": {
+        "operationId": "AppointmentController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete an appointment",
+        "tags": [
+          "appointments"
+        ]
+      }
+    },
+    "/prescriptions": {
+      "post": {
+        "operationId": "PrescriptionController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePrescriptionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Prescription created successfully."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a prescription",
+        "tags": [
+          "prescriptions"
+        ]
+      },
+      "get": {
+        "operationId": "PrescriptionController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Prescription list retrieved."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List prescriptions (filtered by connected practitioner)",
+        "tags": [
+          "prescriptions"
+        ]
+      }
+    },
+    "/prescriptions/{id}": {
+      "get": {
+        "operationId": "PrescriptionController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Retrieve a prescription by ID",
+        "tags": [
+          "prescriptions"
+        ]
+      },
+      "put": {
+        "operationId": "PrescriptionController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePrescriptionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a prescription",
+        "tags": [
+          "prescriptions"
+        ]
+      },
+      "delete": {
+        "operationId": "PrescriptionController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a prescription",
+        "tags": [
+          "prescriptions"
+        ]
+      }
+    },
+    "/api/v1/analytics/summary": {
+      "get": {
+        "operationId": "AnalyticsController_getAnalytics",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Analytical statistics from the PySpark engine."
+          }
+        },
+        "summary": "Retrieve statistics computed by PySpark",
+        "tags": [
+          "Analytics"
+        ]
+      }
+    },
+    "/api/v1/analytics/charts": {
+      "get": {
+        "operationId": "AnalyticsController_getChartsData",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Distributions and top pathologies extracted from FHIR JSONB."
+          }
+        },
+        "summary": "Chart data (FHIR JSONB)",
+        "tags": [
+          "Analytics"
+        ]
+      }
+    },
+    "/api/v1/analytics/live": {
+      "get": {
+        "operationId": "AnalyticsController_getLiveAnalytics",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Live statistics computed directly from relational tables."
+          }
+        },
+        "summary": "Real-time statistics (direct PostgreSQL queries)",
+        "tags": [
+          "Analytics"
+        ]
+      }
+    },
+    "/api/v1/orchestrator/emergency": {
+      "post": {
+        "operationId": "OrchestratorController_triggerEmergency",
+        "parameters": [],
+        "responses": {
+          "202": {
+            "description": "Workflow started successfully."
+          }
+        },
+        "summary": "Trigger the emergency admission workflow",
+        "tags": [
+          "Orchestrator"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "SmartHealth API",
+    "description": "Interactive OpenAPI documentation for the SmartHealth API",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "RegisterDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "doctor@smarthealth.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "securepassword123"
+          },
+          "role": {
+            "type": "string",
+            "example": "DOCTOR",
+            "description": "Role of the new account (DOCTOR or ADMIN)",
+            "enum": [
+              "DOCTOR",
+              "ADMIN"
+            ],
+            "default": "DOCTOR"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "Jean"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Rakoto"
+          },
+          "specialty": {
+            "type": "string",
+            "example": "Cardiologue"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "AuthDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "doctor@smarthealth.com"
+          },
+          "password": {
+            "type": "string",
+            "example": "securepassword123"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "CreatePatientDto": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "example": "Jean"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Rakoto"
+          },
+          "birthDate": {
+            "type": "string",
+            "example": "1990-01-01"
+          },
+          "gender": {
+            "type": "string",
+            "example": "male",
+            "enum": [
+              "male",
+              "female",
+              "other"
+            ]
+          }
+        },
+        "required": [
+          "firstName",
+          "lastName",
+          "birthDate",
+          "gender"
+        ]
+      },
+      "FhirPatientDto": {
+        "type": "object",
+        "properties": {
+          "resourceType": {
+            "type": "string",
+            "description": "FHIR R4 resourceType — must be \"Patient\"",
+            "example": "Patient"
+          },
+          "id": {
+            "type": "string",
+            "description": "FHIR logical ID (from Synthea)",
+            "example": "ab12cd34-ef56-7890-abcd-ef1234567890"
+          }
+        },
+        "required": [
+          "resourceType"
+        ]
+      },
+      "CreatePractitionerDto": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "example": "Marc"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Dupont"
+          },
+          "specialty": {
+            "type": "string",
+            "example": "Cardiologist"
+          },
+          "email": {
+            "type": "string",
+            "example": "marc.dupont@hopital.fr"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+33123456789"
+          }
+        },
+        "required": [
+          "firstName",
+          "lastName",
+          "specialty"
+        ]
+      },
+      "UpdatePractitionerDto": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "example": "Marc"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Dupont"
+          },
+          "specialty": {
+            "type": "string",
+            "example": "Cardiologist"
+          },
+          "email": {
+            "type": "string",
+            "example": "marc.dupont@hopital.fr"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+33123456789"
+          }
+        }
+      },
+      "CreateAppointmentDto": {
+        "type": "object",
+        "properties": {
+          "dateTime": {
+            "type": "string",
+            "example": "2026-05-01T10:00:00Z"
+          },
+          "reason": {
+            "type": "string",
+            "example": "Consultation générale"
+          },
+          "status": {
+            "type": "string",
+            "example": "SCHEDULED",
+            "enum": [
+              "SCHEDULED",
+              "COMPLETED",
+              "CANCELLED",
+              "EMERGENCY"
+            ]
+          },
+          "patientId": {
+            "type": "string",
+            "example": "uuid-of-the-patient"
+          },
+          "practitionerId": {
+            "type": "string",
+            "example": "uuid-of-the-practitioner"
+          }
+        },
+        "required": [
+          "dateTime",
+          "patientId",
+          "practitionerId"
+        ]
+      },
+      "UpdateAppointmentDto": {
+        "type": "object",
+        "properties": {
+          "dateTime": {
+            "type": "string",
+            "example": "2026-05-01T10:00:00Z"
+          },
+          "reason": {
+            "type": "string",
+            "example": "Consultation générale"
+          },
+          "status": {
+            "type": "string",
+            "example": "SCHEDULED",
+            "enum": [
+              "SCHEDULED",
+              "COMPLETED",
+              "CANCELLED",
+              "EMERGENCY"
+            ]
+          },
+          "patientId": {
+            "type": "string",
+            "example": "uuid-of-the-patient"
+          },
+          "practitionerId": {
+            "type": "string",
+            "example": "uuid-of-the-practitioner"
+          }
+        }
+      },
+      "CreatePrescriptionDto": {
+        "type": "object",
+        "properties": {
+          "medications": {
+            "type": "string",
+            "example": "Paracetamol 500mg, Amoxicillin 1g"
+          },
+          "instructions": {
+            "type": "string",
+            "example": "1 pill morning and evening for 5 days."
+          },
+          "appointmentId": {
+            "type": "string",
+            "example": "uuid-of-the-appointment"
+          },
+          "patientId": {
+            "type": "string",
+            "example": "uuid-of-the-patient"
+          },
+          "practitionerId": {
+            "type": "string",
+            "example": "uuid-of-the-practitioner"
+          }
+        },
+        "required": [
+          "medications",
+          "patientId",
+          "practitionerId"
+        ]
+      },
+      "UpdatePrescriptionDto": {
+        "type": "object",
+        "properties": {
+          "medications": {
+            "type": "string",
+            "example": "Paracetamol 500mg, Amoxicillin 1g"
+          },
+          "instructions": {
+            "type": "string",
+            "example": "1 pill morning and evening for 5 days."
+          },
+          "appointmentId": {
+            "type": "string",
+            "example": "uuid-of-the-appointment"
+          },
+          "patientId": {
+            "type": "string",
+            "example": "uuid-of-the-patient"
+          },
+          "practitionerId": {
+            "type": "string",
+            "example": "uuid-of-the-practitioner"
+          }
+        }
+      }
+    }
+  }
+}

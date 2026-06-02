@@ -2,11 +2,14 @@ import React, { useState } from 'react';
 import { useAuth } from './AuthContext';
 import './Login.css';
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://localhost:8243/smarthealth/1.0.0';
+
 export default function Login() {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -15,7 +18,7 @@ export default function Login() {
     setError('');
 
     try {
-      const res = await fetch('http://localhost:3000/auth/login', {
+      const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -66,15 +69,25 @@ export default function Login() {
 
           <div className="login-group">
             <label className="login-label" htmlFor="password">Mot de passe</label>
-            <input
-              id="password"
-              type="password"
-              className="login-input"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-            />
+            <div className="password-wrapper">
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                className="login-input"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+              >
+                {showPassword ? '👁️‍🗨️' : '👁️'}
+              </button>
+            </div>
           </div>
 
           <button type="submit" className="login-submit" disabled={loading || !email || !password}>
@@ -82,9 +95,6 @@ export default function Login() {
           </button>
         </form>
 
-        <div className="login-demo-hint">
-          Accès Démo : <code>admin@smarthealth.com</code> / <code>Admin123!</code>
-        </div>
       </div>
     </div>
   );

@@ -13,7 +13,7 @@ const logger = new Logger('Bootstrap');
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
-  // Enable CORS for frontend development
+  // Enable CORS for authorized frontend clients
   const corsOrigin = (process.env.CORS_ORIGIN || 'http://localhost:3000,http://localhost:4200,http://localhost:5173,http://localhost:5000,http://localhost:5001,http://localhost:5002').split(',');
   app.enableCors({
     origin: corsOrigin.map(o => o.trim()),
@@ -35,7 +35,7 @@ async function bootstrap() {
   // Setup Swagger documentation
   const config = new DocumentBuilder()
     .setTitle('SmartHealth API')
-    .setDescription('Documentation interactive de l API SmartHealth')
+    .setDescription("Interactive OpenAPI documentation for the SmartHealth API — A high-performance, interoperable FHIR R4 clinical platform")
     .setVersion('1.0')
     .addBearerAuth()
     .build();
@@ -45,8 +45,8 @@ async function bootstrap() {
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
   
-  logger.log(`🚀 Application is running on: http://localhost:${port}`);
-  logger.log(`📚 API Documentation available at: http://localhost:${port}/api/docs`);
+  logger.log(`Application is running on: http://localhost:${port}`);
+  logger.log(`API Documentation available at: http://localhost:${port}/api/docs`);
 }
 
 bootstrap().catch((error) => {

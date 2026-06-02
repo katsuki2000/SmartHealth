@@ -1,17 +1,13 @@
 /**
- * Workflow d'Admission d'Urgence — SmartHealth
+ * Emergency Admission Workflow — SmartHealth
  *
- * Ce fichier est PUREMENT DÉTERMINISTE (exigence Temporal).
- * Il ne fait AUCUN appel réseau, AUCUN accès base de données.
- * Il orchestre uniquement l'ordre d'exécution des Activities.
- *
- * Si le serveur plante au milieu, Temporal reprendra exactement
- * à l'étape où il s'est arrêté grâce au Event Sourcing.
+ * Purely deterministic (Temporal requirement).
+ * Orchestrates the execution order of Activities only.
+ * On crash, Temporal resumes at the exact step via Event Sourcing.
  */
 import { proxyActivities, sleep, log } from '@temporalio/workflow';
 import type * as activities from '../activities/patient-activities';
 
-// Proxy des activities avec configuration des retries
 const {
   createEmergencyFhirPatient,
   assignOnCallPractitioner,
@@ -26,7 +22,6 @@ const {
   },
 });
 
-// ─── Interface d'entrée du workflow ──────────────────────
 export interface EmergencyAdmissionInput {
   firstName: string;
   lastName: string;
@@ -35,7 +30,6 @@ export interface EmergencyAdmissionInput {
   reason: string;
 }
 
-// ─── Le Workflow Principal ───────────────────────────────
 export async function emergencyAdmissionWorkflow(
   input: EmergencyAdmissionInput,
 ): Promise<{
@@ -44,29 +38,23 @@ export async function emergencyAdmissionWorkflow(
   appointmentId: string;
   status: string;
 }> {
-  log.info('🚨 WORKFLOW DÉMARRÉ : Admission d\'urgence', { patient: `${input.firstName} ${input.lastName}` });
+  log.info('WORKFLOW STARTED: Emergency admission', { patient: `${input.firstName} ${input.lastName}` });
 
-  // ── Étape 1 : Créer le dossier patient FHIR ──────────
-  log.info('📋 Étape 1/4 : Création du dossier FHIR...');
+  log.info('Step 1/4: Creating FHIR patient record...');
   const patientId = await createEmergencyFhirPatient(input);
 
-  // ── Étape 2 : Assigner un praticien de garde ──────────
-  log.info('👨‍⚕️ Étape 2/4 : Recherche du praticien de garde...');
+  log.info('Step 2/4: Assigning on-call practitioner...');
   const practitionerId = await assignOnCallPractitioner();
 
-  // ── Étape 3 : Créer le rendez-vous d'urgence ──────────
-  log.info('📅 Étape 3/4 : Création du rendez-vous d\'urgence...');
+  log.info('Step 3/4: Creating emergency appointment...');
   const appointmentId = await createEmergencyAppointment(patientId, practitionerId);
 
-  // ── Étape 4 : Notifier le praticien ───────────────────
-  log.info('🔔 Étape 4/4 : Notification du praticien...');
+  log.info('Step 4/4: Notifying practitioner...');
   await notifyPractitioner(practitionerId, patientId, appointmentId);
 
-  // ── Délai de confirmation (simulé) ────────────────────
-  log.info('⏳ Attente de 5 secondes (simulation de confirmation)...');
   await sleep('5 seconds');
 
-  log.info('✅ WORKFLOW TERMINÉ : Patient admis avec succès !');
+  log.info('WORKFLOW COMPLETED: Patient admitted successfully!');
 
   return {
     patientId,

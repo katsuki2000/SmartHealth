@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import './ClinicalForms.css'
 
-const API_BASE = 'http://localhost:3000'
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://localhost:8243/smarthealth/1.0.0'
 
 interface PrescriptionFormProps {
   onClose: () => void
@@ -10,12 +10,9 @@ interface PrescriptionFormProps {
 
 interface Practitioner {
   id: string
-  userId: string
+  firstName: string
+  lastName: string
   specialty: string
-  user: {
-    firstName: string
-    lastName: string
-  }
 }
 
 interface Patient {
@@ -29,6 +26,25 @@ function getToken(): string {
   if (!token) throw new Error('Non authentifié')
   return token
 }
+
+const translateSpecialty = (s: string) => {
+  const map: Record<string, string> = {
+    'Diagnostician': 'Diagnosticien',
+    'Cardiologue': 'Cardiologue',
+    'Généraliste': 'Généraliste',
+    'Surgeon': 'Chirurgien',
+    'Nurse': 'Infirmier/ère',
+  };
+  return map[s] || s;
+};
+
+const getPractitionerName = (p: any) => {
+  if (p.name) return `Dr. ${p.name}`;
+  if (p.firstName && p.lastName && p.firstName !== 'À définir' && p.lastName !== 'À définir') {
+    return `Dr. ${p.firstName} ${p.lastName}`;
+  }
+  return `Médecin #${p.id.slice(0, 6)}`;
+};
 
 export default function PrescriptionForm({ onClose, onSuccess }: PrescriptionFormProps) {
   const [loading, setLoading] = useState(false)
@@ -44,6 +60,9 @@ export default function PrescriptionForm({ onClose, onSuccess }: PrescriptionFor
     patientId: '',
     practitionerId: '',
   })
+  
+  const [searchTerm, setSearchTerm] = useState('')
+  const [showDropdown, setShowDropdown] = useState(false)
 
   useEffect(() => {
     async function loadData() {
@@ -68,6 +87,7 @@ export default function PrescriptionForm({ onClose, onSuccess }: PrescriptionFor
             practitionerId: practData[0].id,
             patientId: patData[0].id
           }))
+          setSearchTerm(`${patData[0].firstName} ${patData[0].lastName}`)
         }
       } catch (err) {
         setError('Impossible de charger les listes de médecins/patients.')
@@ -81,6 +101,16 @@ export default function PrescriptionForm({ onClose, onSuccess }: PrescriptionFor
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
+
+  const handlePatientSelect = (p: Patient) => {
+    setFormData({ ...formData, patientId: p.id })
+    setSearchTerm(`${p.firstName} ${p.lastName}`)
+    setShowDropdown(false)
+  }
+
+  const filteredPatients = patients.filter(p => 
+    `${p.firstName} ${p.lastName}`.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -123,17 +153,36 @@ export default function PrescriptionForm({ onClose, onSuccess }: PrescriptionFor
         {dataLoading ? (
           <div className="pf-error-msg" style={{ background: 'transparent', color: '#94a3b8' }}>Chargement des données...</div>
         ) : (
-          <form className="pf-form" onSubmit={handleSubmit}>
+          <form className="pf-form" onSubmit={handleSubmit} autoComplete="off">
             {error && <div className="pf-error-msg">{error}</div>}
 
             <div className="pf-row">
-              <div className="pf-group">
+              <div className="pf-group" style={{ position: 'relative' }}>
                 <label className="pf-label">Patient</label>
-                <select name="patientId" className="pf-select" value={formData.patientId} onChange={handleChange} required>
-                  {patients.map(p => (
-                    <option key={p.id} value={p.id}>{p.firstName} {p.lastName}</option>
-                  ))}
-                </select>
+                <input 
+                  type="text" 
+                  className="pf-input" 
+                  placeholder="Chercher un patient..."
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value)
+                    setShowDropdown(true)
+                  }}
+                  onFocus={() => setShowDropdown(true)}
+                />
+                {showDropdown && filteredPatients.length > 0 && (
+                  <div className="pf-dropdown">
+                    {filteredPatients.map(p => (
+                      <div 
+                        key={p.id} 
+                        className={`pf-dropdown-item ${formData.patientId === p.id ? 'selected' : ''}`}
+                        onClick={() => handlePatientSelect(p)}
+                      >
+                        {p.firstName} {p.lastName}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -142,7 +191,9 @@ export default function PrescriptionForm({ onClose, onSuccess }: PrescriptionFor
                 <label className="pf-label">Médecin Prescripteur</label>
                 <select name="practitionerId" className="pf-select" value={formData.practitionerId} onChange={handleChange} required>
                   {practitioners.map(p => (
-                    <option key={p.id} value={p.id}>Dr. {p.user?.lastName || p.id.slice(0,6)} ({p.specialty})</option>
+                    <option key={p.id} value={p.id}>
+                      {getPractitionerName(p)} ({translateSpecialty(p.specialty)})
+                    </option>
                   ))}
                 </select>
               </div>

@@ -22,8 +22,8 @@ SmartHealth/
 ## 🛠️ Tech Stack & Local Setup
 
 ### 1. API Gateway (WSO2 API Manager)
-- **Role:** Point d'entrée public unique. Gère le routage, le Rate Limiting, la sécurité (OAuth2/JWT) et l'exposition des APIs vers les applications clientes.
-- **Local Setup:** Binaire WSO2 installé nativement sur Windows (nécessite Java). Tourne typiquement sur `localhost:8243` et `localhost:9443`. Il route les requêtes vers le `ingestion-service`.
+- **Role:** Point d'entrée public unique **obligatoire**. Gère le routage, le Rate Limiting, la sécurité (OAuth2/JWT) et l'exposition des APIs vers les applications clientes. Toutes les requêtes frontend transitent par la Gateway.
+- **Local Setup:** Binaire WSO2 installé nativement sur Windows (nécessite Java). Tourne sur `localhost:8243` (HTTPS Gateway) et `localhost:9443` (Publisher/DevPortal). Route les requêtes vers le `ingestion-service`.
 
 ### 2. Ingestion Service (Backend Core)
 - **Framework:** NestJS (TypeScript)

@@ -46,7 +46,7 @@ export class PatientService {
       },
     });
 
-    this.logger.log(`✅ FHIR Patient stored — internal id: ${resource.id}`);
+    this.logger.log(`FHIR Patient stored — internal id: ${resource.id}`);
 
     this.eventEmitter
       .emitFhirResourceCreated({ id: resource.id, resourceType: 'Patient' })
@@ -142,7 +142,7 @@ export class PatientService {
   async emergencyAccess(patientId: string, userId: string, reason: string) {
     const practitioner = await this.prisma.practitioner.findUnique({ where: { userId } });
     if (!practitioner) {
-      throw new BadRequestException('Seul un médecin peut utiliser l\'accès d\'urgence');
+      throw new BadRequestException('Only a doctor can use emergency access');
     }
 
     const patient = await this.prisma.patient.findUnique({ where: { id: patientId } });
@@ -162,5 +162,124 @@ export class PatientService {
     this.logger.warn(`⚠️ EMERGENCY ACCESS: Practitioner ${practitioner.id} accessed Patient ${patient.id}. Reason: ${reason}`);
 
     return patient;
+  }
+
+  // ─── FLUX 4 : Historique Clinique FHIR (JSONB) ──────────────
+  /**
+   * Récupère l'historique clinique d'un patient en interrogeant
+   * la table JSONB fhir_resources.
+   * 
+   * Stratégie de liaison :
+   * 1. On récupère le patient relationnel (firstName, lastName)
+   * 2. On cherche le FHIR Patient correspondant par nom
+   * 3. On récupère toutes les ressources liées par subject.reference
+   */
+  async getClinicalHistory(patientId: string) {
+    // 1. Récupérer le patient relationnel
+    const patient = await this.prisma.patient.findUnique({ where: { id: patientId } });
+    if (!patient) {
+      throw new NotFoundException(`Patient with ID ${patientId} not found`);
+    }
+
+    // 2. Chercher le FHIR Patient correspondant par nom (family + given)
+    const fhirPatients = await this.prisma.$queryRaw<any[]>`
+      SELECT id, content
+      FROM fhir_resources
+      WHERE "resourceType" = 'Patient'
+        AND content->'name'->0->>'family' = ${patient.lastName}
+        AND content->'name'->0->'given'->>0 = ${patient.firstName}
+      LIMIT 1
+    `;
+
+    if (!fhirPatients || fhirPatients.length === 0) {
+      // Pas de correspondance FHIR trouvée — retourne les infos relationnelles uniquement
+      return {
+        patient,
+        fhirLinked: false,
+        conditions: [],
+        observations: [],
+        encounters: [],
+        medications: [],
+        allergies: [],
+      };
+    }
+
+    const fhirPatient = fhirPatients[0];
+    const fhirPatientId = (fhirPatient.content as any)?.id;
+
+    if (!fhirPatientId) {
+      return {
+        patient,
+        fhirLinked: false,
+        conditions: [],
+        observations: [],
+        encounters: [],
+        medications: [],
+        allergies: [],
+      };
+    }
+
+    // 3. Récupérer les ressources liées via subject.reference
+    const patientRef = `urn:uuid:${fhirPatientId}`;
+
+    // Conditions (Diagnostics)
+    const conditions = await this.prisma.$queryRaw<any[]>`
+      SELECT content
+      FROM fhir_resources
+      WHERE "resourceType" = 'Condition'
+        AND content->'subject'->>'reference' = ${patientRef}
+      ORDER BY (content->>'onsetDateTime')::text DESC
+      LIMIT 50
+    `;
+
+    // Observations (Signes vitaux)
+    const observations = await this.prisma.$queryRaw<any[]>`
+      SELECT content
+      FROM fhir_resources
+      WHERE "resourceType" = 'Observation'
+        AND content->'subject'->>'reference' = ${patientRef}
+      ORDER BY (content->>'effectiveDateTime')::text DESC
+      LIMIT 50
+    `;
+
+    // Encounters (Séjours / Consultations)
+    const encounters = await this.prisma.$queryRaw<any[]>`
+      SELECT content
+      FROM fhir_resources
+      WHERE "resourceType" = 'Encounter'
+        AND content->'subject'->>'reference' = ${patientRef}
+      ORDER BY (content->'period'->>'start')::text DESC
+      LIMIT 30
+    `;
+
+    // MedicationRequests (Prescriptions)
+    const medications = await this.prisma.$queryRaw<any[]>`
+      SELECT content
+      FROM fhir_resources
+      WHERE "resourceType" = 'MedicationRequest'
+        AND content->'subject'->>'reference' = ${patientRef}
+      ORDER BY (content->>'authoredOn')::text DESC
+      LIMIT 30
+    `;
+
+    // AllergyIntolerance
+    const allergies = await this.prisma.$queryRaw<any[]>`
+      SELECT content
+      FROM fhir_resources
+      WHERE "resourceType" = 'AllergyIntolerance'
+        AND content->'patient'->>'reference' = ${patientRef}
+      LIMIT 20
+    `;
+
+    return {
+      patient,
+      fhirLinked: true,
+      fhirPatientId,
+      conditions: conditions.map(r => r.content),
+      observations: observations.map(r => r.content),
+      encounters: encounters.map(r => r.content),
+      medications: medications.map(r => r.content),
+      allergies: allergies.map(r => r.content),
+    };
   }
 }
